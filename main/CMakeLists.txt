@@ -1,6 +1,5 @@
 set(srcs
-    "Main.c"
-    "RadarTrigger.c")
+    "Main.c")
 
 idf_component_register(SRCS "${srcs}" 
                     INCLUDE_DIRS "../include")

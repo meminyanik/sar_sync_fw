@@ -21,6 +21,9 @@
 	The header file of the Radar Trigger handler
 */
 
+#ifndef RADAR_TRIGGER_H
+#define RADAR_TRIGGER_H
+
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/portmacro.h"
@@ -34,23 +37,9 @@
 #include "esp_log.h"
 
 
-#define PCNT_TEST_UNIT      PCNT_UNIT_0
-#define PCNT_H_LIM_VAL      10
-#define PCNT_L_LIM_VAL     -10
-#define PCNT_THRESH1_VAL    5
-#define PCNT_INPUT_SIG_IO   4  // Pulse Input GPIO
-#define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down
 #define LEDC_OUTPUT_IO      18 // Output GPIO of a sample 1 Hz pulse generator
-
-
-/* A sample structure to pass events from the PCNT
- * interrupt handler to the main program.
- */
-typedef struct {
-    int unit;  // the PCNT unit that originated an interrupt
-    uint32_t status; // information on the event type that caused the interrupt
-} pcnt_evt_t;
-
 
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params);
+
+#endif

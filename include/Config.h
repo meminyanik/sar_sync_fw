@@ -21,6 +21,9 @@
 	The configuration header file
 */
 
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <stdio.h>
 
 //
@@ -28,3 +31,5 @@
 //
 #define DEFAULT_TASK_STACK_SIZE_WORDS       1 * 1024
 #define DEFAULT_TASK_STACK_SIZE_BYTES       DEFAULT_TASK_STACK_SIZE_WORDS * sizeof(uint32_t)
+
+#endif

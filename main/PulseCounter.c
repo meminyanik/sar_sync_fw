@@ -28,7 +28,7 @@
  * and pass this information together with the event type
  * the main program using a queue.
  */
-static void IRAM_ATTR pcnt_example_intr_handler(void *arg)
+static void IRAM_ATTR pcntInterruptHandler(void *arg)
 {
     uint32_t intr_status = PCNT.int_st.val;
     int i;
@@ -50,8 +50,12 @@ static void IRAM_ATTR pcnt_example_intr_handler(void *arg)
     }
 }
 
-
-void pcnt_example_init(void)
+/* Initialize PCNT functions:
+ *  - configure and initialize PCNT
+ *  - set up the input filter
+ *  - set up the counter events to watch
+ */
+void pcntInitialize(void)
 {
     /* Prepare configuration for the PCNT unit */
     pcnt_config_t pcnt_config = {
@@ -90,7 +94,7 @@ void pcnt_example_init(void)
     pcnt_counter_clear(PCNT_TEST_UNIT);
 
     /* Register ISR handler and enable interrupts for PCNT unit */
-    pcnt_isr_register(pcnt_example_intr_handler, NULL, 0, &user_isr_handle);
+    pcnt_isr_register(pcntInterruptHandler, NULL, 0, &user_isr_handle);
     pcnt_intr_enable(PCNT_TEST_UNIT);
 
     /* Everything is set up, now go to counting */

@@ -14,25 +14,25 @@
 /*
   Module Name:
 
-	RadarTrigger.h
+	LedControl.h
 
   Abstract:
 
-	The header file of the Radar Trigger handler
+	The header file of the Led Control handler
 */
 
-#ifndef RADAR_TRIGGER_H
-#define RADAR_TRIGGER_H
+#ifndef LED_CONTROL_H
+#define LED_CONTROL_H
 
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/periph_ctrl.h"
-#include "esp_attr.h"
+#include "driver/ledc.h"
+#include "driver/gpio.h"
 
+// Output GPIO of a sample 1 Hz pulse generator
+#define LEDC_OUTPUT_IO      18 
 
-/* The Radar Trigger Task */
-void radarTriggerTask(void* params);
+/* Configure LED PWM Controller
+ * to output sample pulses at 1 Hz with duty of about 10%
+ */
+void ledcInitialize(void);
 
 #endif

@@ -26,15 +26,10 @@
 
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
-#include "freertos/portmacro.h"
-#include "freertos/task.h"
 #include "freertos/queue.h"
 #include "driver/periph_ctrl.h"
-#include "driver/ledc.h"
-#include "driver/gpio.h"
 #include "driver/pcnt.h"
 #include "esp_attr.h"
-#include "esp_log.h"
 
 
 #define PCNT_TEST_UNIT      PCNT_UNIT_0
@@ -64,6 +59,6 @@ typedef struct {
  *  - set up the input filter
  *  - set up the counter events to watch
  */
-void pcnt_example_init(void);
+void pcntInitialize(void);
 
 #endif

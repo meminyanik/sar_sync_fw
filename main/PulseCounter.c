@@ -63,7 +63,7 @@ void pcntInitialize(void)
         .pulse_gpio_num = PCNT_INPUT_SIG_IO,
         .ctrl_gpio_num = PCNT_INPUT_CTRL_IO,
         .channel = PCNT_CHANNEL_0,
-        .unit = PCNT_TEST_UNIT,
+        .unit = PCNT_UNIT,
         // What to do on the positive / negative edge of pulse input?
         .pos_mode = PCNT_COUNT_INC,   // Count up on the positive edge
         .neg_mode = PCNT_COUNT_DIS,   // Keep the counter value on the negative edge
@@ -74,29 +74,30 @@ void pcntInitialize(void)
         .counter_h_lim = PCNT_H_LIM_VAL,
         .counter_l_lim = PCNT_L_LIM_VAL,
     };
+
     /* Initialize PCNT unit */
     pcnt_unit_config(&pcnt_config);
 
     /* Configure and enable the input filter */
-    pcnt_set_filter_value(PCNT_TEST_UNIT, 100);
-    pcnt_filter_enable(PCNT_TEST_UNIT);
+    pcnt_set_filter_value(PCNT_UNIT, 100);
+    pcnt_filter_enable(PCNT_UNIT);
 
-    /* Set threshold 0 and 1 values and enable events to watch */
-    pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_1, PCNT_THRESH1_VAL);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_1);
+    /* Set threshold value and enable event to watch */
+    pcnt_set_event_value(PCNT_UNIT, PCNT_EVT_THRES_0, PCNT_THRES_VAL);
+    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_THRES_0);
     /* Enable events on zero, maximum and minimum limit values */
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_ZERO);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_H_LIM);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_L_LIM);
+    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_ZERO);
+    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_H_LIM);
+    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_L_LIM);
 
     /* Initialize PCNT's counter */
-    pcnt_counter_pause(PCNT_TEST_UNIT);
-    pcnt_counter_clear(PCNT_TEST_UNIT);
+    pcnt_counter_pause(PCNT_UNIT);
+    pcnt_counter_clear(PCNT_UNIT);
 
     /* Register ISR handler and enable interrupts for PCNT unit */
     pcnt_isr_register(pcntInterruptHandler, NULL, 0, &user_isr_handle);
-    pcnt_intr_enable(PCNT_TEST_UNIT);
+    pcnt_intr_enable(PCNT_UNIT);
 
     /* Everything is set up, now go to counting */
-    pcnt_counter_resume(PCNT_TEST_UNIT);
+    pcnt_counter_resume(PCNT_UNIT);
 }

@@ -26,6 +26,30 @@
 #include <RadarTrigger.h>
 
 
+/*
+Initialize Radar Trigger
+*/
+static void radarTriggerInitialize(void)
+{
+    /* Prepare configuration for the Radar Trigger Gpio Pin */
+    gpio_config_t radarTriggerGpioConfig = {
+        //disable interrupt
+        .intr_type = GPIO_PIN_INTR_DISABLE,
+        //set as output mode
+        .mode = GPIO_MODE_OUTPUT,
+        //bit mask of the pins that you want to set,e.g.GPIO18/19
+        .pin_bit_mask = GPIO_OUTPUT_PIN_SEL,
+        //disable pull-down mode
+        .pull_down_en = 0,
+        //disable pull-up mode
+        .pull_up_en = 0,
+    };
+
+    //configure GPIO with the given settings
+    gpio_config(&radarTriggerGpioConfig);
+}
+
+
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params)
 {
@@ -34,6 +58,9 @@ void radarTriggerTask(void* params)
 
     /* Initialize LEDC to generate sample pulse signal */
     ledcInitialize();
+
+    /* Initialize Radar Trigger to generate trigger signal */
+    radarTriggerInitialize();
 
     /* Initialize PCNT event queue and PCNT functions */
     pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
@@ -49,10 +76,14 @@ void radarTriggerTask(void* params)
          */
         res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
         if (res == pdTRUE) {
-            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
+            pcnt_get_counter_value(PCNT_UNIT, &count);
             printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
-            if (evt.status & PCNT_STATUS_THRES1_M) {
-                printf("THRES1 EVT\n");
+            if (evt.status & PCNT_STATUS_THRES0_M) {
+                printf("THRES0 EVT\n");
+                pcnt_counter_clear(PCNT_UNIT);
+
+                gpio_set_level(RADAR_TRIGGER_OUT_PIN, 1);
+                gpio_set_level(RADAR_TRIGGER_OUT_PIN, 0);
             }
             if (evt.status & PCNT_STATUS_L_LIM_M) {
                 printf("L_LIM EVT\n");
@@ -63,17 +94,14 @@ void radarTriggerTask(void* params)
             if (evt.status & PCNT_STATUS_ZERO_M) {
                 printf("ZERO EVT\n");
             }
-        } else {
-            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
-            printf("Current counter value :%d\n", count);
         }
     }
 
     /* Free the ISR service handle */
-    // if(user_isr_handle) {
-    //     esp_intr_free(user_isr_handle);
-    //     user_isr_handle = NULL;
-    // }
+    if(user_isr_handle) {
+        esp_intr_free(user_isr_handle);
+        user_isr_handle = NULL;
+    }
 
     /* The task is created. */
     vTaskDelete(NULL);

@@ -30,7 +30,12 @@
 #include "freertos/queue.h"
 #include "driver/periph_ctrl.h"
 #include "esp_attr.h"
+#include "driver/gpio.h"
 
+
+// Output GPIO of the Radar Trigger
+#define RADAR_TRIGGER_OUT_PIN      19
+#define GPIO_OUTPUT_PIN_SEL  (1ULL<<RADAR_TRIGGER_OUT_PIN)
 
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params);

@@ -32,10 +32,10 @@
 #include "esp_attr.h"
 
 
-#define PCNT_TEST_UNIT      PCNT_UNIT_0
-#define PCNT_H_LIM_VAL      10
-#define PCNT_L_LIM_VAL     -10
-#define PCNT_THRESH1_VAL    5
+#define PCNT_UNIT      		PCNT_UNIT_0
+#define PCNT_H_LIM_VAL      10000
+#define PCNT_L_LIM_VAL     	0
+#define PCNT_THRES_VAL  	5
 #define PCNT_INPUT_SIG_IO   4  // Pulse Input GPIO
 #define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down
 

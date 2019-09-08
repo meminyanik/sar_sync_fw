@@ -21,131 +21,23 @@
 	The implementation file of the Radar Trigger handler
 */
 
+#include <PulseCounter.h>
+#include <LedControl.h>
 #include <RadarTrigger.h>
 
 
-/* A queue to handle pulse counter events */
-xQueueHandle pcnt_evt_queue;   
-
-/* user's ISR service handle */
-pcnt_isr_handle_t user_isr_handle = NULL;
-
-/* Decode what PCNT's unit originated an interrupt
- * and pass this information together with the event type
- * the main program using a queue.
- */
-static void IRAM_ATTR pcnt_example_intr_handler(void *arg)
-{
-    uint32_t intr_status = PCNT.int_st.val;
-    int i;
-    pcnt_evt_t evt;
-    portBASE_TYPE HPTaskAwoken = pdFALSE;
-
-    for (i = 0; i < PCNT_UNIT_MAX; i++) {
-        if (intr_status & (BIT(i))) {
-            evt.unit = i;
-            /* Save the PCNT event type that caused an interrupt
-               to pass it to the main program */
-            evt.status = PCNT.status_unit[i].val;
-            PCNT.int_clr.val = BIT(i);
-            xQueueSendFromISR(pcnt_evt_queue, &evt, &HPTaskAwoken);
-            if (HPTaskAwoken == pdTRUE) {
-                portYIELD_FROM_ISR();
-            }
-        }
-    }
-}
-
-/* Configure LED PWM Controller
- * to output sample pulses at 1 Hz with duty of about 10%
- */
-static void ledc_init(void)
-{
-    // Prepare and then apply the LEDC PWM timer configuration
-    ledc_timer_config_t ledc_timer;
-    ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
-    ledc_timer.timer_num        = LEDC_TIMER_1;
-    ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 1;  // set output frequency at 1 Hz
-    ledc_timer_config(&ledc_timer);
-
-    // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel;
-    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel.channel    = LEDC_CHANNEL_1;
-    ledc_channel.timer_sel  = LEDC_TIMER_1;
-    ledc_channel.intr_type  = LEDC_INTR_DISABLE;
-    ledc_channel.gpio_num   = LEDC_OUTPUT_IO;
-    ledc_channel.duty       = 100; // set duty at about 10%
-    ledc_channel.hpoint     = 0;
-    ledc_channel_config(&ledc_channel);
-}
-
-/* Initialize PCNT functions:
- *  - configure and initialize PCNT
- *  - set up the input filter
- *  - set up the counter events to watch
- */
-static void pcnt_example_init(void)
-{
-    /* Prepare configuration for the PCNT unit */
-    pcnt_config_t pcnt_config = {
-        // Set PCNT input signal and control GPIOs
-        .pulse_gpio_num = PCNT_INPUT_SIG_IO,
-        .ctrl_gpio_num = PCNT_INPUT_CTRL_IO,
-        .channel = PCNT_CHANNEL_0,
-        .unit = PCNT_TEST_UNIT,
-        // What to do on the positive / negative edge of pulse input?
-        .pos_mode = PCNT_COUNT_INC,   // Count up on the positive edge
-        .neg_mode = PCNT_COUNT_DIS,   // Keep the counter value on the negative edge
-        // What to do when control input is low or high?
-        .lctrl_mode = PCNT_MODE_REVERSE, // Reverse counting direction if low
-        .hctrl_mode = PCNT_MODE_KEEP,    // Keep the primary counter mode if high
-        // Set the maximum and minimum limit values to watch
-        .counter_h_lim = PCNT_H_LIM_VAL,
-        .counter_l_lim = PCNT_L_LIM_VAL,
-    };
-    /* Initialize PCNT unit */
-    pcnt_unit_config(&pcnt_config);
-
-    /* Configure and enable the input filter */
-    pcnt_set_filter_value(PCNT_TEST_UNIT, 100);
-    pcnt_filter_enable(PCNT_TEST_UNIT);
-
-    /* Set threshold 0 and 1 values and enable events to watch */
-    pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_1, PCNT_THRESH1_VAL);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_1);
-    pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_0, PCNT_THRESH0_VAL);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_0);
-    /* Enable events on zero, maximum and minimum limit values */
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_ZERO);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_H_LIM);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_L_LIM);
-
-    /* Initialize PCNT's counter */
-    pcnt_counter_pause(PCNT_TEST_UNIT);
-    pcnt_counter_clear(PCNT_TEST_UNIT);
-
-    /* Register ISR handler and enable interrupts for PCNT unit */
-    pcnt_isr_register(pcnt_example_intr_handler, NULL, 0, &user_isr_handle);
-    pcnt_intr_enable(PCNT_TEST_UNIT);
-
-    /* Everything is set up, now go to counting */
-    pcnt_counter_resume(PCNT_TEST_UNIT);
-}
-
 /* The Radar Trigger Task */
-void vRadarTriggerTask(void* params)
+void radarTriggerTask(void* params)
 {
     /* The parameter value is expected to be NULL. */
     configASSERT(params == NULL);
 
     /* Initialize LEDC to generate sample pulse signal */
-    ledc_init();
+    ledcInitialize();
 
     /* Initialize PCNT event queue and PCNT functions */
     pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
-    pcnt_example_init();
+    pcntInitialize();
 
     int16_t count = 0;
     pcnt_evt_t evt;
@@ -161,9 +53,6 @@ void vRadarTriggerTask(void* params)
             printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
             if (evt.status & PCNT_STATUS_THRES1_M) {
                 printf("THRES1 EVT\n");
-            }
-            if (evt.status & PCNT_STATUS_THRES0_M) {
-                printf("THRES0 EVT\n");
             }
             if (evt.status & PCNT_STATUS_L_LIM_M) {
                 printf("L_LIM EVT\n");
@@ -181,10 +70,10 @@ void vRadarTriggerTask(void* params)
     }
 
     /* Free the ISR service handle */
-    if(user_isr_handle) {
-        esp_intr_free(user_isr_handle);
-        user_isr_handle = NULL;
-    }
+    // if(user_isr_handle) {
+    //     esp_intr_free(user_isr_handle);
+    //     user_isr_handle = NULL;
+    // }
 
     /* The task is created. */
     vTaskDelete(NULL);

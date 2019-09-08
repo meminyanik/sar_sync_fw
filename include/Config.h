@@ -14,25 +14,22 @@
 /*
   Module Name:
 
-	RadarTrigger.h
+	Config.h
 
   Abstract:
 
-	The header file of the Radar Trigger handler
+	The configuration header file
 */
 
-#ifndef RADAR_TRIGGER_H
-#define RADAR_TRIGGER_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/periph_ctrl.h"
-#include "esp_attr.h"
 
-
-/* The Radar Trigger Task */
-void radarTriggerTask(void* params);
+//
+// Thread/task parameters
+//
+#define DEFAULT_TASK_STACK_SIZE_WORDS       1 * 1024
+#define DEFAULT_TASK_STACK_SIZE_BYTES       DEFAULT_TASK_STACK_SIZE_WORDS * sizeof(uint32_t)
 
 #endif

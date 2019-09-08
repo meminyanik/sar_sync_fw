@@ -24,6 +24,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include <Config.h>
 #include <RadarTrigger.h>
 
 
@@ -53,13 +54,13 @@ void app_main(void)
     BaseType_t xReturned;
 
     xReturned = xTaskCreatePinnedToCore(
-                        vRadarTriggerTask,      /* Function that implements the task. */
-                    	"RadarTriggerTask",     /* Text name for the task. */
-                    	2048,                   /* Stack size in words, not bytes. */
-                    	NULL,               	/* Parameter passed into the task. */
-                    	5,                      /* Priority at which the task is created. */
-                    	&xRadarTriggerTask,     /* Used to pass out the created task's handle. */
-                        0);	                    /* Core number. */
+                        radarTriggerTask,      			/* Function that implements the task. */
+                    	"RadarTriggerTask",     		/* Text name for the task. */
+                    	DEFAULT_TASK_STACK_SIZE_BYTES,  /* Stack size in bytes. */
+                    	NULL,               			/* Parameter passed into the task. */
+                    	5,                      		/* Priority at which the task is created. */
+                    	&xRadarTriggerTask,     		/* Used to pass out the created task's handle. */
+                        0);	                    		/* Core number. */
 
     if( xReturned != pdPASS )
     {

@@ -38,7 +38,6 @@
 #define PCNT_H_LIM_VAL      10
 #define PCNT_L_LIM_VAL     -10
 #define PCNT_THRESH1_VAL    5
-#define PCNT_THRESH0_VAL   -5
 #define PCNT_INPUT_SIG_IO   4  // Pulse Input GPIO
 #define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down
 #define LEDC_OUTPUT_IO      18 // Output GPIO of a sample 1 Hz pulse generator
@@ -54,4 +53,4 @@ typedef struct {
 
 
 /* The Radar Trigger Task */
-void vRadarTriggerTask(void* params);
+void radarTriggerTask(void* params);

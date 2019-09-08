@@ -115,8 +115,6 @@ static void pcnt_example_init(void)
     /* Set threshold 0 and 1 values and enable events to watch */
     pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_1, PCNT_THRESH1_VAL);
     pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_1);
-    pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_0, PCNT_THRESH0_VAL);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_0);
     /* Enable events on zero, maximum and minimum limit values */
     pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_ZERO);
     pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_H_LIM);
@@ -135,7 +133,7 @@ static void pcnt_example_init(void)
 }
 
 /* The Radar Trigger Task */
-void vRadarTriggerTask(void* params)
+void radarTriggerTask(void* params)
 {
     /* The parameter value is expected to be NULL. */
     configASSERT(params == NULL);
@@ -161,9 +159,6 @@ void vRadarTriggerTask(void* params)
             printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
             if (evt.status & PCNT_STATUS_THRES1_M) {
                 printf("THRES1 EVT\n");
-            }
-            if (evt.status & PCNT_STATUS_THRES0_M) {
-                printf("THRES0 EVT\n");
             }
             if (evt.status & PCNT_STATUS_L_LIM_M) {
                 printf("L_LIM EVT\n");

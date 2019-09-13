@@ -62,13 +62,13 @@ void radarTriggerTask(void* params)
     /* Initialize Radar Trigger to generate trigger signal */
     radarTriggerInitialize();
 
+    //int16_t count = 0;
+    pcnt_evt_t evt;
+    portBASE_TYPE res;
+    
     /* Initialize PCNT event queue and PCNT functions */
     pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
     pcntInitialize();
-
-    int16_t count = 0;
-    pcnt_evt_t evt;
-    portBASE_TYPE res;
 
     while (1) {
         /* Wait for the event information passed from PCNT's interrupt handler.
@@ -76,10 +76,10 @@ void radarTriggerTask(void* params)
          */
         res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
         if (res == pdTRUE) {
-            pcnt_get_counter_value(PCNT_UNIT, &count);
-            printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
+            //pcnt_get_counter_value(PCNT_UNIT, &count);
+            //printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
             if (evt.status & PCNT_STATUS_THRES0_M) {
-                printf("THRES0 EVT\n");
+                //printf("THRES0 EVT\n");
                 pcnt_counter_clear(PCNT_UNIT);
 
                 gpio_set_level(RADAR_TRIGGER_OUT_PIN, 1);

@@ -33,7 +33,7 @@ static void IRAM_ATTR pcntInterruptHandler(void *arg)
     uint32_t intr_status = PCNT.int_st.val;
     int i;
     pcnt_evt_t evt;
-    portBASE_TYPE HPTaskAwoken = pdFALSE;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
     for (i = 0; i < PCNT_UNIT_MAX; i++) {
         if (intr_status & (BIT(i))) {
@@ -42,8 +42,8 @@ static void IRAM_ATTR pcntInterruptHandler(void *arg)
                to pass it to the main program */
             evt.status = PCNT.status_unit[i].val;
             PCNT.int_clr.val = BIT(i);
-            xQueueSendFromISR(pcnt_evt_queue, &evt, &HPTaskAwoken);
-            if (HPTaskAwoken == pdTRUE) {
+            xQueueSendFromISR(pcnt_evt_queue, &evt, &xHigherPriorityTaskWoken);
+            if (xHigherPriorityTaskWoken == pdTRUE) {
                 portYIELD_FROM_ISR();
             }
         }

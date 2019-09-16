@@ -23,44 +23,37 @@
 
 #include <Uart.h>
 
-// Create RX and TX Buffers
-static const int RX_BUF_SIZE = 1024;
+// Create RX and TX buffers
+uint8_t sUartRxBuffer[UART_BUFFER_SIZE];
+char sUartTxBuffer[UART_BUFFER_SIZE+2];
 
 // Define the UART number
 const int UART_HOST_PC = UART_NUM_0;
 
-int sendData(const char* logName, const char* data)
+int sendUartData(const char* data)
 {
     const int len = strlen(data);
     const int txBytes = uart_write_bytes(UART_HOST_PC, data, len);
-    ESP_LOGI(logName, "Wrote %d bytes", txBytes);
     return txBytes;
 }
 
-void tx_task(void *arg)
+void uartTask(void *arg)
 {
-    static const char *TX_TASK_TAG = "TX_TASK";
-    esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);
+    // Read the packet and process it
     while (1) {
-        sendData(TX_TASK_TAG, "Hello world");
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-    }
-}
-
-void rx_task(void *arg)
-{
-    static const char *RX_TASK_TAG = "RX_TASK";
-    esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
-    uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
-    while (1) {
-        const int rxBytes = uart_read_bytes(UART_HOST_PC, data, RX_BUF_SIZE, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 1000 / portTICK_RATE_MS);
         if (rxBytes > 0) {
-            data[rxBytes] = 0;
-            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
-            ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
+            // Copy the received data into the Tx buffer
+            memcpy(sUartTxBuffer, sUartRxBuffer, rxBytes);
+
+            // Add LF and NULL characters
+            sUartTxBuffer[rxBytes] = 10; // LF
+            sUartTxBuffer[rxBytes+1] = 0; // NULL
+
+            // Send the TX buffer data
+            sendUartData(sUartTxBuffer);
         }
     }
-    free(data);
 }
 
 void uartInitialize(void) {
@@ -75,12 +68,38 @@ void uartInitialize(void) {
 
     // Configure UART
     ESP_ERROR_CHECK(uart_param_config(UART_HOST_PC, &uart_config));
-    uart_set_pin(UART_HOST_PC, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    
-    // We won't use a buffer for sending data.
-    uart_driver_install(UART_HOST_PC, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
 
-    // Create tasks
-    xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(tx_task, "uart_tx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
+    // Set UART pins
+    ESP_ERROR_CHECK(uart_set_pin(UART_HOST_PC,
+                                UART_PIN_NO_CHANGE,
+                                UART_PIN_NO_CHANGE,
+                                UART_PIN_NO_CHANGE,
+                                UART_PIN_NO_CHANGE));
+    
+    // Install UART driver
+    ESP_ERROR_CHECK(uart_driver_install(UART_HOST_PC,
+                                        UART_BUFFER_SIZE,
+                                        UART_BUFFER_SIZE,
+                                        0,
+                                        NULL,
+                                        0));
+
+    // Flush the UART (discard the existing data)
+    ESP_ERROR_CHECK(uart_flush(UART_HOST_PC));
+
+    // Create the UART task
+    BaseType_t xReturned;
+    xReturned = xTaskCreatePinnedToCore(
+                    uartTask,
+                    "UartTask",
+                    DEFAULT_TASK_STACK_SIZE_BYTES,
+                    NULL,
+                    configMAX_PRIORITIES,
+                    NULL,
+                    1);
+    if( xReturned != pdPASS )
+    {
+        /* The task is not created. */
+        printf("The UART Task could not created.");
+    }
 }

@@ -32,6 +32,11 @@
 #include "string.h"
 #include "driver/gpio.h"
 
+#include <Config.h>
+
+
+// Uart RX and TX buffer size
+#define UART_BUFFER_SIZE 	1024
 
 // Initialize the UART Communication
 void uartInitialize(void);

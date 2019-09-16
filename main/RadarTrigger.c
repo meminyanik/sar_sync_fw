@@ -74,6 +74,7 @@ void radarTriggerTask(void* params)
     pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
     pcntInitialize();
 
+    /* Start Task Loop */
     while (1) {
         /* Wait for the event information passed from PCNT's interrupt handler.
          * Once received, decode the event type and print it on the serial monitor.

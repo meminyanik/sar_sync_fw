@@ -24,6 +24,7 @@
 #include <PulseCounter.h>
 #include <LedControl.h>
 #include <RadarTrigger.h>
+#include <Uart.h>
 
 
 /*
@@ -55,6 +56,9 @@ void radarTriggerTask(void* params)
 {
     /* The parameter value is expected to be NULL. */
     configASSERT(params == NULL);
+
+    /* Initialize Uart interface */
+    uartInitialize();
 
     /* Initialize LEDC to generate sample pulse signal */
     ledcInitialize();

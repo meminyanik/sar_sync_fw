@@ -65,8 +65,8 @@ void pcntInitialize(void)
         .channel = PCNT_CHANNEL_0,
         .unit = PCNT_UNIT,
         // What to do on the positive / negative edge of pulse input?
-        .pos_mode = PCNT_COUNT_INC,   // Count up on the positive edge
-        .neg_mode = PCNT_COUNT_DIS,   // Keep the counter value on the negative edge
+        .pos_mode = PCNT_COUNT_DIS,   // Count up on the positive edge
+        .neg_mode = PCNT_COUNT_INC,   // Keep the counter value on the negative edge
         // What to do when control input is low or high?
         .lctrl_mode = PCNT_MODE_REVERSE, // Reverse counting direction if low
         .hctrl_mode = PCNT_MODE_KEEP,    // Keep the primary counter mode if high

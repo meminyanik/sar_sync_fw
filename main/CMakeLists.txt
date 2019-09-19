@@ -1,6 +1,7 @@
 set(srcs
     "Main.c"
     "RadarTrigger.c"
+	"UartHandler.c"
 	"PulseCounter.c"
 	"LedControl.c"
 	"Uart.c")

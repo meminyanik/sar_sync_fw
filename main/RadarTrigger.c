@@ -86,9 +86,7 @@ void radarTriggerTask(void* params)
             if (evt.status & PCNT_STATUS_THRES0_M) {
                 //printf("THRES0 EVT\n");
                 pcnt_counter_clear(PCNT_UNIT);
-
-                gpio_set_level(RADAR_TRIGGER_OUT_PIN, 1);
-                gpio_set_level(RADAR_TRIGGER_OUT_PIN, 0);
+                triggerRadar();
             }
             if (evt.status & PCNT_STATUS_L_LIM_M) {
                 printf("L_LIM EVT\n");
@@ -110,4 +108,11 @@ void radarTriggerTask(void* params)
 
     /* The task is created. */
     vTaskDelete(NULL);
+}
+
+/* Radar Trigger Command */
+void triggerRadar(void)
+{
+    gpio_set_level(RADAR_TRIGGER_OUT_PIN, 1);
+    gpio_set_level(RADAR_TRIGGER_OUT_PIN, 0);
 }

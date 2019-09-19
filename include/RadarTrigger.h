@@ -40,4 +40,7 @@
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params);
 
+/* Radar Trigger Command */
+void triggerRadar(void);
+
 #endif

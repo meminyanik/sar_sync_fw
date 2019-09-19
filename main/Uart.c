@@ -39,6 +39,7 @@ int sendUartData(const char* data, uint32_t length)
 
 void uartTask(void *arg)
 {
+    // prepare the number of reply bytes
     uint32_t numReplyBytesWritten = 0;
 
     // Read the packet and process it
@@ -46,7 +47,7 @@ void uartTask(void *arg)
         const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 1000 / portTICK_RATE_MS);
         if (rxBytes > 0) {
             // Handle the buffer content
-            uartHandleBuffer(sUartRxBuffer,
+            uartHandleBufferSimple(sUartRxBuffer,
                             rxBytes,
                             (uint8_t*)sUartTxBuffer,
                             UART_BUFFER_SIZE,

@@ -38,6 +38,18 @@ void uartHandleBuffer(
     uint32_t replySizeInBytes,          // Reply buffer size
     uint32_t* pNumReplyBytesWritten);   // Pointer to the number of reply bytes written
 
+
+//-----------------------------------------------------------------------------
+// handle the post buffer (simple version)
+// prepare the reply buffer (simpe version)
+//-----------------------------------------------------------------------------
+void uartHandleBufferSimple(
+    const uint8_t* pPostBuffer,         // Pointer to the post buffer
+    uint32_t postSizeInBytes,           // Post buffer size
+    uint8_t* pReplyBuffer,              // Pointer to the reply buffer
+    uint32_t replySizeInBytes,          // Reply buffer size
+    uint32_t* pNumReplyBytesWritten);   // Pointer to the number of reply bytes written
+
 //-----------------------------------------------------------------------------
 // the checksum algorithm used is the 8-Bit Fletcher Algorithm (used in the TCP standard)
 //-----------------------------------------------------------------------------

@@ -22,6 +22,7 @@
 */
 
 #include <Uart.h>
+#include <UartHandler.h>
 
 // Create RX and TX buffers
 uint8_t sUartRxBuffer[UART_BUFFER_SIZE];
@@ -30,28 +31,29 @@ char sUartTxBuffer[UART_BUFFER_SIZE+2];
 // Define the UART number
 const int UART_HOST_PC = UART_NUM_0;
 
-int sendUartData(const char* data)
+int sendUartData(const char* data, uint32_t length)
 {
-    const int len = strlen(data);
-    const int txBytes = uart_write_bytes(UART_HOST_PC, data, len);
+    const int txBytes = uart_write_bytes(UART_HOST_PC, data, length);
     return txBytes;
 }
 
 void uartTask(void *arg)
 {
+    uint32_t numReplyBytesWritten = 0;
+
     // Read the packet and process it
     while (1) {
         const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 1000 / portTICK_RATE_MS);
         if (rxBytes > 0) {
-            // Copy the received data into the Tx buffer
-            memcpy(sUartTxBuffer, sUartRxBuffer, rxBytes);
-
-            // Add LF and NULL characters
-            sUartTxBuffer[rxBytes] = 10; // LF
-            sUartTxBuffer[rxBytes+1] = 0; // NULL
+            // Handle the buffer content
+            uartHandleBuffer(sUartRxBuffer,
+                            rxBytes,
+                            (uint8_t*)sUartTxBuffer,
+                            UART_BUFFER_SIZE,
+                            &numReplyBytesWritten);
 
             // Send the TX buffer data
-            sendUartData(sUartTxBuffer);
+            sendUartData(sUartTxBuffer, numReplyBytesWritten);
         }
     }
 }

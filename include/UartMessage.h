@@ -28,11 +28,6 @@
 
 
 //-----------------------------------------------------------------------------
-//  Define simplified protocol version variables
-//-----------------------------------------------------------------------------
-#define SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE 3
-
-//-----------------------------------------------------------------------------
 //  Uart Protocol 2-byte Preamble
 //-----------------------------------------------------------------------------
 #define UART_PROTOCOL_PREAMBLE 0x7570u  // "up (Uart Protocol)" in ASCII
@@ -99,7 +94,6 @@ typedef struct
 // Uart Protocol Overhead Size
 //-----------------------------------------------------------------------------
 #define UART_PROTOCOL_OVERHEAD_SIZE_BYTES sizeof(UartProtocolHeader) + sizeof(UartProtocolFooter)
-
 
 //-----------------------------------------------------------------------------
 // The Uart message that will be passed to the command handlers

@@ -14,25 +14,22 @@
 /*
   Module Name:
 
-	Config.h
+	UartMessageSimplified.h
 
   Abstract:
 
-	The configuration header file
+	Uart protocol frame data structures (simplified version) header file
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef UART_MESSAGE_SIMPLIFIED_H
+#define UART_MESSAGE_SIMPLIFIED_H
 
 #include <stdio.h>
 
-//
-// Thread/task parameters
-//
-#define DEFAULT_TASK_STACK_SIZE_WORDS       1 * 1024
-#define DEFAULT_TASK_STACK_SIZE_BYTES       DEFAULT_TASK_STACK_SIZE_WORDS * sizeof(uint32_t)
 
-// If the advanced protocol is used, comment this line
-#define SIMPLIFIED_PROTOCOL_VERSION
+//-----------------------------------------------------------------------------
+//  Define simplified protocol version variables
+//-----------------------------------------------------------------------------
+#define SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE 3   // in bytes
 
 #endif

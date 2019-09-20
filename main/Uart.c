@@ -22,11 +22,16 @@
 */
 
 #include <Uart.h>
-#include <UartHandler.h>
+
+#ifdef SIMPLIFIED_PROTOCOL_VERSION
+    #include <UartHandlerSimplified.h>
+#else
+    #include <UartHandler.h>
+#endif
 
 // Create RX and TX buffers
 uint8_t sUartRxBuffer[UART_BUFFER_SIZE];
-char sUartTxBuffer[UART_BUFFER_SIZE+2];
+char sUartTxBuffer[UART_BUFFER_SIZE];
 
 // Define the UART number
 const int UART_HOST_PC = UART_NUM_0;
@@ -47,12 +52,20 @@ void uartTask(void *arg)
         const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 1000 / portTICK_RATE_MS);
         if (rxBytes > 0) {
             // Handle the buffer content
-            uartHandleBufferSimple(sUartRxBuffer,
+            #ifdef SIMPLIFIED_PROTOCOL_VERSION
+                uartHandleBufferSimplified(sUartRxBuffer,
                             rxBytes,
                             (uint8_t*)sUartTxBuffer,
                             UART_BUFFER_SIZE,
                             &numReplyBytesWritten);
-
+            #else
+                uartHandleBuffer(sUartRxBuffer,
+                            rxBytes,
+                            (uint8_t*)sUartTxBuffer,
+                            UART_BUFFER_SIZE,
+                            &numReplyBytesWritten);
+            #endif
+            
             // Send the TX buffer data
             sendUartData(sUartTxBuffer, numReplyBytesWritten);
         }

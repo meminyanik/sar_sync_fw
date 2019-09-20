@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "cstdint": "c"
+        "cstdint": "c",
+        "uarthandler.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

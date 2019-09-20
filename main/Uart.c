@@ -67,7 +67,10 @@ void uartTask(void *arg)
             #endif
             
             // Send the TX buffer data
-            sendUartData(sUartTxBuffer, numReplyBytesWritten);
+            if (numReplyBytesWritten > 0)
+            {
+                sendUartData(sUartTxBuffer, numReplyBytesWritten);
+            }
         }
     }
 }

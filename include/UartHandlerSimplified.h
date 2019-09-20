@@ -39,4 +39,20 @@ void uartHandleBufferSimplified(
     uint32_t replySizeInBytes,          // Reply buffer size
     uint32_t* pNumReplyBytesWritten);   // Pointer to the number of reply bytes written
 
+
+//-----------------------------------------------------------------------------
+// handle the radar trigger command
+//-----------------------------------------------------------------------------
+void handleRadarTriggerCommand(void);
+
+//-----------------------------------------------------------------------------
+// handle the radar trigger command
+//-----------------------------------------------------------------------------
+void handleSetPulseCountCommand(uint16_t* pNumPulse);
+
+//-----------------------------------------------------------------------------
+// handle the radar trigger command
+//-----------------------------------------------------------------------------
+void handleSetNumMeasurementCommand(uint16_t* pNumMeasurement);
+
 #endif

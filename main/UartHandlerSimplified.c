@@ -30,9 +30,9 @@ Abstract:
 //-----------------------------------------------------------------------------
 //  Define simplified protocol version variables
 //-----------------------------------------------------------------------------
-char simpleErrorResponse[] = "ERR";
-char simpleSuccessResponse[] = "SUC";
-char simpleRadarCommand[] = "RTG";
+static char radarTriggerCommand[] = "RTG";
+static char setPulseCountCommand[] = "PLS";
+static char setNumMeasurementCommand[] = "MSR";
 
 //-----------------------------------------------------------------------------
 // handle the post buffer (simplified version)
@@ -46,13 +46,16 @@ void uartHandleBufferSimplified(
     uint32_t* pNumReplyBytesWritten)
 {
     //-----------------------------------------------------------------------------
+    // by default, nothing is written to the reply buffer
+    //-----------------------------------------------------------------------------
+    *pNumReplyBytesWritten = 0;
+
+    //-----------------------------------------------------------------------------
     // post packet should at least be the command size
     //-----------------------------------------------------------------------------
     if (postSizeInBytes < SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE)
     {
         printf("Received packet is too small (received:%d < expected:%d).\n", postSizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
-        memcpy(pReplyBuffer, simpleErrorResponse, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
-        *pNumReplyBytesWritten = SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE;
         return;
     }
 
@@ -62,24 +65,53 @@ void uartHandleBufferSimplified(
     if (replySizeInBytes < SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE)
     {
         printf("Reply size is too small (received:%d < expected:%d).\n", replySizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
-        *pNumReplyBytesWritten = 0;
         return;
     }
 
     //-----------------------------------------------------------------------------
     // handle the command
     //-----------------------------------------------------------------------------
-    if (memcmp(pPostBuffer, simpleRadarCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    if (memcmp(pPostBuffer, radarTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
         printf("Radar trigger command is received.\n");
-        triggerRadar();
-        memcpy(pReplyBuffer, simpleSuccessResponse, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        handleRadarTriggerCommand();
+    }
+    else if (memcmp(pPostBuffer, setPulseCountCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    {
+        printf("Set pulse count command is received.\n");
+        // handleSetPulseCountCommand();
+    }
+    else if (memcmp(pPostBuffer, setNumMeasurementCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    {
+        printf("Set number of measurement command is received.\n");
+        // handleSetNumMeasurementCommand();
     }
     else
     {
         printf("Unknown command is received.\n");
-        memcpy(pReplyBuffer, simpleErrorResponse, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
     }
+}
 
-    *pNumReplyBytesWritten = SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE;
+//-----------------------------------------------------------------------------
+// handle the radar trigger command
+//-----------------------------------------------------------------------------
+void handleRadarTriggerCommand(void)
+{
+    triggerRadar();
+}
+
+//-----------------------------------------------------------------------------
+// handle the radar trigger command
+//-----------------------------------------------------------------------------
+void handleSetPulseCountCommand(uint16_t* pNumPulse)
+{
+
+}
+
+//-----------------------------------------------------------------------------
+// handle the radar trigger command
+//-----------------------------------------------------------------------------
+void handleSetNumMeasurementCommand(uint16_t* pNumMeasurement)
+{
+
 }

@@ -45,8 +45,9 @@ xQueueHandle pcnt_evt_queue;
 /* user's ISR service handle */
 pcnt_isr_handle_t user_isr_handle;
 
-/* A sample structure to pass events from the PCNT
- * interrupt handler to the main program.
+/* 
+	The data structure to pass events from the PCNT
+	interrupt handler to the radar trigger task.
  */
 typedef struct {
     int unit;  // the PCNT unit that originated an interrupt

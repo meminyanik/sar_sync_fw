@@ -27,7 +27,7 @@ Abstract:
 #include <stdlib.h>
 
 #include <UartHandlerSimplified.h>
-#include <RadarTrigger.h>
+#include <Uart.h>
 #include <PulseCounter.h>
 
 
@@ -101,7 +101,8 @@ void uartHandleBufferSimplified(
 //-----------------------------------------------------------------------------
 void handleRadarTriggerCommand(void)
 {
-    triggerRadar();
+    uart_evt_t evt = UART_RADAR_TRIGGER_COMMAND;
+    xQueueSend(uart_evt_queue, &evt, 0 / portTICK_PERIOD_MS);
 }
 
 //-----------------------------------------------------------------------------

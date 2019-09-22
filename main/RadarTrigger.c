@@ -21,6 +21,7 @@
 	The implementation file of the Radar Trigger handler
 */
 
+#include <Uart.h>
 #include <PulseCounter.h>
 #include <RadarTrigger.h>
 
@@ -31,39 +32,75 @@ void radarTriggerTask(void* params)
     /* The parameter value is expected to be NULL. */
     configASSERT(params == NULL);
 
-    //int16_t count = 0;
-    pcnt_evt_t evt;
+    pcnt_evt_t pcnt_evt;
+    uart_evt_t uart_evt;
     portBASE_TYPE res;
     
-    /* Initialize PCNT event queue and PCNT functions */
-    pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
-    pcntInitialize();
+    /* Create the radar trigger queue set */
+    radar_trigger_queue_set = xQueueCreateSet(RADAR_TRIGGER_QUEUE_SET_LENGTH);
+
+    /* Initialize PCNT and UART event queues */
+    pcnt_evt_queue = xQueueCreate(PCNT_EVT_QUEUE_LENGTH, sizeof(pcnt_evt_t));
+    uart_evt_queue = xQueueCreate(UART_EVT_QUEUE_LENGTH, sizeof(uart_evt_t));
+
+    /* Check everything was created. */
+    configASSERT(radar_trigger_queue_set);
+    configASSERT(pcnt_evt_queue);
+    configASSERT(uart_evt_queue);
+
+    /* Add the queues to the set */
+    xQueueAddToSet(pcnt_evt_queue, radar_trigger_queue_set);
+    xQueueAddToSet(uart_evt_queue, radar_trigger_queue_set);
 
     /* Start Task Loop */
     while (1) {
         /* 
-            Wait for the event information passed from PCNT's interrupt handler.
-            Once received, decode the event type and print it on the serial monitor.
-         */
-        res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
-        if (res == pdTRUE) {
-            //pcnt_get_counter_value(PCNT_UNIT, &count);
-            //printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
-            if (evt.status & PCNT_STATUS_THRES0_M) {
-                //printf("THRES0 EVT\n");
-                pcnt_counter_clear(PCNT_UNIT);
-                triggerRadar();
-            }
-            if (evt.status & PCNT_STATUS_L_LIM_M) {
-                printf("L_LIM EVT\n");
-            }
-            if (evt.status & PCNT_STATUS_H_LIM_M) {
-                printf("H_LIM EVT\n");
-            }
-            if (evt.status & PCNT_STATUS_ZERO_M) {
-                printf("ZERO EVT\n");
+            Block to wait for something to be available from the queues
+            Don't block longer than 1000 ms
+        */
+        radar_trigger_queue_activated = xQueueSelectFromSet(radar_trigger_queue_set,
+                                                            1000 / portTICK_PERIOD_MS );
+
+        /* Which set member was selected?  Receives/takes can use a block time
+        of zero as they are guaranteed to pass because xQueueSelectFromSet()
+        would not have returned the handle unless something was available. */
+        if(radar_trigger_queue_activated == pcnt_evt_queue)
+        {
+            /* 
+                Wait for the event information passed from PCNT's interrupt handler.
+                Once received, decode the event type.
+            */
+            res = xQueueReceive(pcnt_evt_queue, &pcnt_evt, 0 / portTICK_PERIOD_MS);
+            if (res == pdTRUE) {
+                if (pcnt_evt.status & PCNT_STATUS_THRES0_M) {
+                    triggerRadar();
+                    pcnt_counter_clear(PCNT_UNIT);
+                }
+                if (pcnt_evt.status & PCNT_STATUS_L_LIM_M) {
+                    printf("L_LIM EVT\n");
+                }
+                if (pcnt_evt.status & PCNT_STATUS_H_LIM_M) {
+                    printf("H_LIM EVT\n");
+                }
+                if (pcnt_evt.status & PCNT_STATUS_ZERO_M) {
+                    printf("ZERO EVT\n");
+                }
             }
         }
+        else if (radar_trigger_queue_activated == uart_evt_queue)
+        {
+            /* 
+                Wait for the event information passed from UART task.
+                Once received, decode the event status.
+            */
+            res = xQueueReceive(uart_evt_queue, &uart_evt, 0 / portTICK_PERIOD_MS);
+            if (res == pdTRUE) {
+                if (uart_evt == UART_RADAR_TRIGGER_COMMAND) {
+                    triggerRadar();
+                }
+            }
+        }
+
     }
 
     /* Free the ISR service handle */
@@ -93,10 +130,16 @@ void radarTriggerInitialize(void)
         .pull_up_en = 0,
     };
 
-    //configure GPIO with the given settings
+    /* configure GPIO with the given settings */
     gpio_config(&radarTriggerGpioConfig);
 
-    /* Create the task, storing the handle. */
+    /* set the level of the pin to 0 */
+    if (gpio_get_level(RADAR_TRIGGER_OUT_PIN) != 0)
+    {
+        gpio_set_level(RADAR_TRIGGER_OUT_PIN, 0);
+    }
+
+    /* Create the task, store the handle. */
     BaseType_t xReturned;
     xReturned = xTaskCreatePinnedToCore(
                         radarTriggerTask,      			/* Function that implements the task. */

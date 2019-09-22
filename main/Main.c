@@ -27,6 +27,7 @@
 #include <Config.h>
 #include <Uart.h>
 #include <RadarTrigger.h>
+#include <PulseCounter.h>
 
 #ifdef INTERNAL_TEST_MODE
     #include <LedControl.h>
@@ -64,6 +65,11 @@ void app_main(void)
 	// Initialize Radar Trigger to generate trigger signal
 	//-----------------------------------------------------
     radarTriggerInitialize();
+
+	//-----------------------------------------------------
+	// Initialize Pulse Counter to count pulses
+	//-----------------------------------------------------
+	pcntInitialize();
 
 	//-----------------------------------------------------
 	// Initialize Uart interface

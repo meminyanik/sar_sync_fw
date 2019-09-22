@@ -38,6 +38,16 @@
 // Uart RX and TX buffer size
 #define UART_BUFFER_SIZE 	1024
 
+/* A queue to handle Uart radar trigger events */
+xQueueHandle uart_evt_queue;
+
+/* 
+	The data type to pass events from the Uart task
+	to the radar trigger task.
+ */
+typedef uint32_t uart_evt_t;
+#define UART_RADAR_TRIGGER_COMMAND 1
+
 // Initialize the UART Communication
 void uartInitialize(void);
 

@@ -36,6 +36,7 @@ Abstract:
 //-----------------------------------------------------------------------------
 static char radarTriggerCommand[] = "RTG";
 static char setPulseCountCommand[] = "PLS";
+static char resetPcntCommand[] = "RST";
 static char setNumMeasurementCommand[] = "MSR";
 
 //-----------------------------------------------------------------------------
@@ -85,10 +86,15 @@ void uartHandleBufferSimplified(
         printf("Set pulse count command is received\n");
         handleSetPulseCountCommand(pPostBuffer, postSizeInBytes);
     }
+    else if (memcmp(pPostBuffer, resetPcntCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    {
+        printf("Reset command is received\n");
+        handleResetPcntCommand();
+    }
     else if (memcmp(pPostBuffer, setNumMeasurementCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
         printf("Set number of measurement command is received\n");
-        // handleSetNumMeasurementCommand();
+        handleSetNumMeasurementCommand(pPostBuffer, postSizeInBytes);
     }
     else
     {
@@ -141,9 +147,45 @@ void handleSetPulseCountCommand(const uint8_t* pPostBuffer,
 }
 
 //-----------------------------------------------------------------------------
+// handle the reset command
+//-----------------------------------------------------------------------------
+void handleResetPcntCommand(void)
+{
+    pcnt_counter_pause(PCNT_UNIT);
+    pcnt_counter_clear(PCNT_UNIT);
+    pcnt_counter_resume(PCNT_UNIT);
+}
+
+//-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetNumMeasurementCommand(uint16_t* pNumMeasurement)
+void handleSetNumMeasurementCommand(const uint8_t* pPostBuffer,
+                                    uint32_t postSizeInBytes)
 {
-
+    // Set the last character to NULL
+    char numMeasurementParameter[5]; // Maximum 5 characters for the int16_t
+        
+    if((postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) <=5)
+    {
+        memcpy(numMeasurementParameter,
+            pPostBuffer+SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE,
+            postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+    }
+    else {
+        printf("Configuration parameter is too long\n");
+        return;
+    }
+        
+    // Read the parameter
+    uint16_t numMeasurement;
+    numMeasurement = atoi(numMeasurementParameter);
+     
+    if (numMeasurement > 0 )
+    {
+        printf("Number of measurement value is: %d\n", numMeasurement);
+    }
+    else
+    {
+        printf("There is no valid configuration parameter in the command\n");
+    }
 }

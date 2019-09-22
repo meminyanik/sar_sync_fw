@@ -52,8 +52,14 @@ void handleSetPulseCountCommand(const uint8_t* pPostBuffer,
                                 uint32_t postSizeInBytes);
 
 //-----------------------------------------------------------------------------
+// handle the reset command
+//-----------------------------------------------------------------------------
+void handleResetPcntCommand(void);
+
+//-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetNumMeasurementCommand(uint16_t* pNumMeasurement);
+void handleSetNumMeasurementCommand(const uint8_t* pPostBuffer,
+                                	uint32_t postSizeInBytes);
 
 #endif

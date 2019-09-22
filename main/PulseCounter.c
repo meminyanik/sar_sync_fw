@@ -83,8 +83,10 @@ void pcntInitialize(void)
     pcnt_filter_enable(PCNT_UNIT);
 
     /* Set threshold value and enable event to watch */
-    pcnt_set_event_value(PCNT_UNIT, PCNT_EVT_THRES_0, PCNT_THRES_VAL);
+    pcntThreshold = 10;
+    pcnt_set_event_value(PCNT_UNIT, PCNT_EVT_THRES_0, pcntThreshold);
     pcnt_event_enable(PCNT_UNIT, PCNT_EVT_THRES_0);
+    
     /* Enable events on zero, maximum and minimum limit values */
     pcnt_event_enable(PCNT_UNIT, PCNT_EVT_ZERO);
     pcnt_event_enable(PCNT_UNIT, PCNT_EVT_H_LIM);

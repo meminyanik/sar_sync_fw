@@ -29,9 +29,10 @@
     #include <UartHandler.h>
 #endif
 
+
 // Create RX and TX buffers
-uint8_t sUartRxBuffer[UART_BUFFER_SIZE];
-char sUartTxBuffer[UART_BUFFER_SIZE];
+static uint8_t sUartRxBuffer[UART_BUFFER_SIZE];
+static char sUartTxBuffer[UART_BUFFER_SIZE];
 
 // Define the UART number
 const int UART_HOST_PC = UART_NUM_0;

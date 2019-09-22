@@ -22,9 +22,13 @@ Abstract:
 
 */
 
-#include <UartHandlerSimplified.h>
+
 #include <string.h>
+#include <stdlib.h>
+
+#include <UartHandlerSimplified.h>
 #include <RadarTrigger.h>
+#include <PulseCounter.h>
 
 
 //-----------------------------------------------------------------------------
@@ -55,7 +59,7 @@ void uartHandleBufferSimplified(
     //-----------------------------------------------------------------------------
     if (postSizeInBytes < SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE)
     {
-        printf("Received packet is too small (received:%d < expected:%d).\n", postSizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        printf("Received packet is too small (received:%d < expected:%d)\n", postSizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
         return;
     }
 
@@ -64,7 +68,7 @@ void uartHandleBufferSimplified(
     //-----------------------------------------------------------------------------
     if (replySizeInBytes < SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE)
     {
-        printf("Reply size is too small (received:%d < expected:%d).\n", replySizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        printf("Reply size is too small (received:%d < expected:%d)\n", replySizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
         return;
     }
 
@@ -73,22 +77,22 @@ void uartHandleBufferSimplified(
     //-----------------------------------------------------------------------------
     if (memcmp(pPostBuffer, radarTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
-        printf("Radar trigger command is received.\n");
+        printf("Radar trigger command is received\n");
         handleRadarTriggerCommand();
     }
     else if (memcmp(pPostBuffer, setPulseCountCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
-        printf("Set pulse count command is received.\n");
-        // handleSetPulseCountCommand();
+        printf("Set pulse count command is received\n");
+        handleSetPulseCountCommand(pPostBuffer, postSizeInBytes);
     }
     else if (memcmp(pPostBuffer, setNumMeasurementCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
-        printf("Set number of measurement command is received.\n");
+        printf("Set number of measurement command is received\n");
         // handleSetNumMeasurementCommand();
     }
     else
     {
-        printf("Unknown command is received.\n");
+        printf("Unknown command is received\n");
     }
 }
 
@@ -103,9 +107,36 @@ void handleRadarTriggerCommand(void)
 //-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetPulseCountCommand(uint16_t* pNumPulse)
+void handleSetPulseCountCommand(const uint8_t* pPostBuffer,
+                                uint32_t postSizeInBytes)
 {
-
+    // Set the last character to NULL
+    char pulseCountParameter[5]; // Maximum 5 characters for the int16_t
+        
+    if((postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) <=5)
+    {
+        memcpy(pulseCountParameter,
+            pPostBuffer+SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE,
+            postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+    }
+    else {
+        printf("Configuration parameter is too long\n");
+        return;
+    }
+        
+    // Read the parameter
+    int pcntThreshold;
+    pcntThreshold = atoi(pulseCountParameter);
+     
+    if (pcntThreshold > 0 )
+    {
+        printf("Current pulse counter value is: %d\n", pcntThreshold);
+        pcnt_set_event_value(PCNT_UNIT, PCNT_EVT_THRES_0, pcntThreshold);
+    }
+    else
+    {
+        printf("There is no valid configuration parameter in the command\n");
+    }
 }
 
 //-----------------------------------------------------------------------------

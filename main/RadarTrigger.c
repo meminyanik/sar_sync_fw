@@ -22,33 +22,7 @@
 */
 
 #include <PulseCounter.h>
-#include <LedControl.h>
 #include <RadarTrigger.h>
-#include <Uart.h>
-
-
-/*
-Initialize Radar Trigger
-*/
-static void radarTriggerInitialize(void)
-{
-    /* Prepare configuration for the Radar Trigger Gpio Pin */
-    gpio_config_t radarTriggerGpioConfig = {
-        //disable interrupt
-        .intr_type = GPIO_PIN_INTR_DISABLE,
-        //set as output mode
-        .mode = GPIO_MODE_OUTPUT,
-        //bit mask of the pins that you want to set,e.g.GPIO18/19
-        .pin_bit_mask = GPIO_OUTPUT_PIN_SEL,
-        //disable pull-down mode
-        .pull_down_en = 0,
-        //disable pull-up mode
-        .pull_up_en = 0,
-    };
-
-    //configure GPIO with the given settings
-    gpio_config(&radarTriggerGpioConfig);
-}
 
 
 /* The Radar Trigger Task */
@@ -56,15 +30,6 @@ void radarTriggerTask(void* params)
 {
     /* The parameter value is expected to be NULL. */
     configASSERT(params == NULL);
-
-    /* Initialize Uart interface */
-    uartInitialize();
-
-    /* Initialize LEDC to generate sample pulse signal */
-    ledcInitialize();
-
-    /* Initialize Radar Trigger to generate trigger signal */
-    radarTriggerInitialize();
 
     //int16_t count = 0;
     pcnt_evt_t evt;
@@ -76,8 +41,9 @@ void radarTriggerTask(void* params)
 
     /* Start Task Loop */
     while (1) {
-        /* Wait for the event information passed from PCNT's interrupt handler.
-         * Once received, decode the event type and print it on the serial monitor.
+        /* 
+            Wait for the event information passed from PCNT's interrupt handler.
+            Once received, decode the event type and print it on the serial monitor.
          */
         res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
         if (res == pdTRUE) {
@@ -108,6 +74,43 @@ void radarTriggerTask(void* params)
 
     /* The task is created. */
     vTaskDelete(NULL);
+}
+
+// Initialize Radar Trigger
+void radarTriggerInitialize(void)
+{
+    /* Prepare configuration for the Radar Trigger Gpio Pin */
+    gpio_config_t radarTriggerGpioConfig = {
+        //disable interrupt
+        .intr_type = GPIO_PIN_INTR_DISABLE,
+        //set as output mode
+        .mode = GPIO_MODE_OUTPUT,
+        //bit mask of the pins that you want to set,e.g.GPIO18/19
+        .pin_bit_mask = GPIO_OUTPUT_PIN_SEL,
+        //disable pull-down mode
+        .pull_down_en = 0,
+        //disable pull-up mode
+        .pull_up_en = 0,
+    };
+
+    //configure GPIO with the given settings
+    gpio_config(&radarTriggerGpioConfig);
+
+    /* Create the task, storing the handle. */
+    BaseType_t xReturned;
+    xReturned = xTaskCreatePinnedToCore(
+                        radarTriggerTask,      			/* Function that implements the task. */
+                    	"RadarTriggerTask",     		/* Text name for the task. */
+                    	DEFAULT_TASK_STACK_SIZE_BYTES,  /* Stack size in bytes. */
+                    	NULL,               			/* Parameter passed into the task. */
+                    	5,                      		/* Priority at which the task is created. */
+                    	&xRadarTriggerTask,     		/* Used to pass out the created task's handle. */
+                        0);	                    		/* Core number. */
+    if( xReturned != pdPASS )
+    {
+        /* The task is not created. */
+        printf("The Radar Trigger Task could not created.");
+    }
 }
 
 /* Radar Trigger Command */

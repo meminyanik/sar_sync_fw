@@ -25,7 +25,13 @@
 #include "freertos/task.h"
 
 #include <Config.h>
+#include <Uart.h>
 #include <RadarTrigger.h>
+
+#ifdef INTERNAL_TEST_MODE
+    #include <LedControl.h>
+#endif
+
 
 
 /*
@@ -33,39 +39,35 @@
 	and triggers Radar after a predefined number of pulses
 
 	Functionality of GPIOs used in this example:
-     GPIO4 - pulse input pin,
-     GPIO5 - control input pin.
+     GPIO4 -  pulse input pin,
+     GPIO19 - radar trigger output pin.
+
+	 GPIO18 - LEDC output for internal test
     
-	To do this test, you should connect the pulse output of the Motion Controller to GPIO4.
-	GPIO5 is the control signal, you can leave it floating with internal pull up,
-	or connect it to ground. If left floating, the count value will be increasing.
-	If you connect GPIO5 to GND, the count value will be decreasing.
+	To use this code, you should connect the pulse output of the Motion Controller to GPIO4.
+	GPIO5 is the radar trigger signal.
   
-	The radar is triggered when the counter value:
-	reaches a threshold value,
+	The radar is triggered when the counter value reaches a threshold value.
 */
 
 
-TaskHandle_t xRadarTriggerTask;  // A task handle for the radar trigger
-
 void app_main(void)
-{	
-    // /* Create the task, storing the handle. */
-    BaseType_t xReturned;
+{
+	//-----------------------------------------------------
+	// Initialize LEDC to generate sample pulse signal
+	//-----------------------------------------------------
+    #ifdef INTERNAL_TEST_MODE
+		ledcInitialize();
+	#endif
 
-    xReturned = xTaskCreatePinnedToCore(
-                        radarTriggerTask,      			/* Function that implements the task. */
-                    	"RadarTriggerTask",     		/* Text name for the task. */
-                    	DEFAULT_TASK_STACK_SIZE_BYTES,  /* Stack size in bytes. */
-                    	NULL,               			/* Parameter passed into the task. */
-                    	5,                      		/* Priority at which the task is created. */
-                    	&xRadarTriggerTask,     		/* Used to pass out the created task's handle. */
-                        0);	                    		/* Core number. */
+	//-----------------------------------------------------
+	// Initialize Radar Trigger to generate trigger signal
+	//-----------------------------------------------------
+    radarTriggerInitialize();
 
-    if( xReturned != pdPASS )
-    {
-        /* The task is not created. */
-        printf("The Radar Trigger Task could not created.");
-    }
+	//-----------------------------------------------------
+	// Initialize Uart interface
+	//-----------------------------------------------------
+    uartInitialize();
 	
 }

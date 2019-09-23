@@ -50,7 +50,7 @@ void uartTask(void *arg)
 
     // Read the packet and process it
     while (1) {
-        const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 10 / portTICK_RATE_MS);
         if (rxBytes > 0) {
             // Handle the buffer content
             #ifdef SIMPLIFIED_PROTOCOL_VERSION

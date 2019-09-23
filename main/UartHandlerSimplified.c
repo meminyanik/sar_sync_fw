@@ -34,6 +34,9 @@ Abstract:
 //-----------------------------------------------------------------------------
 //  Define simplified protocol version variables
 //-----------------------------------------------------------------------------
+static char startSymbol = '$';
+static char stopSymbol = '#';
+
 static char radarTriggerCommand[] = "RTG";
 static char setPulseCountCommand[] = "PLS";
 static char resetPcntCommand[] = "RST";
@@ -58,47 +61,72 @@ void uartHandleBufferSimplified(
     //-----------------------------------------------------------------------------
     // post packet should at least be the command size
     //-----------------------------------------------------------------------------
-    if (postSizeInBytes < SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE)
+    if (postSizeInBytes < SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE)
     {
-        printf("Received packet is too small (received:%d < expected:%d)\n", postSizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        printf("Received packet is too small (received:%d < expected:%d)\n", postSizeInBytes, SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE);
         return;
     }
 
     //-----------------------------------------------------------------------------
     // reply size should at least be the command size
     //-----------------------------------------------------------------------------
-    if (replySizeInBytes < SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE)
+    if (replySizeInBytes < SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE)
     {
-        printf("Reply size is too small (received:%d < expected:%d)\n", replySizeInBytes, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        printf("Reply size is too small (received:%d < expected:%d)\n", replySizeInBytes, SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE);
         return;
     }
 
     //-----------------------------------------------------------------------------
+    // check the start symbol
+    //-----------------------------------------------------------------------------
+    if (pPostBuffer[0] != startSymbol)
+    {
+        printf("Invalid start symbol is received\n");
+        return;
+    }
+
+    //-----------------------------------------------------------------------------
+    // check the stop symbol
+    //-----------------------------------------------------------------------------
+    if (pPostBuffer[postSizeInBytes-1] != stopSymbol)
+    {
+        printf("Invalid stop symbol is received\n");
+        return;
+    }
+
+    //-----------------------------------------------------------------------------
+    // get the pointer for the command part
+    //-----------------------------------------------------------------------------
+    const uint8_t* pCommand = pPostBuffer + 1;
+
+    //-----------------------------------------------------------------------------
     // handle the command
     //-----------------------------------------------------------------------------
-    if (memcmp(pPostBuffer, radarTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    if ((memcmp(pCommand, radarTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+        && (postSizeInBytes == SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE))
     {
         printf("Radar trigger command is received\n");
         handleRadarTriggerCommand();
     }
-    else if (memcmp(pPostBuffer, setPulseCountCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    else if (memcmp(pCommand, setPulseCountCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
         printf("Set pulse count command is received\n");
-        handleSetPulseCountCommand(pPostBuffer, postSizeInBytes);
+        handleSetPulseCountCommand(pCommand, postSizeInBytes);
     }
-    else if (memcmp(pPostBuffer, resetPcntCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    else if ((memcmp(pCommand, resetPcntCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+            && (postSizeInBytes == SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE))
     {
         printf("Reset command is received\n");
         handleResetPcntCommand();
     }
-    else if (memcmp(pPostBuffer, setNumMeasurementCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    else if (memcmp(pCommand, setNumMeasurementCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
         printf("Set number of measurement command is received\n");
-        handleSetNumMeasurementCommand(pPostBuffer, postSizeInBytes);
+        handleSetNumMeasurementCommand(pCommand, postSizeInBytes);
     }
     else
     {
-        printf("Unknown command is received\n");
+        printf("Invalid command is received\n");
     }
 }
 
@@ -114,17 +142,17 @@ void handleRadarTriggerCommand(void)
 //-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetPulseCountCommand(const uint8_t* pPostBuffer,
+void handleSetPulseCountCommand(const uint8_t* pCommand,
                                 uint32_t postSizeInBytes)
 {
     // Set the last character to NULL
     char pulseCountParameter[5]; // Maximum 5 characters for the int16_t
         
-    if((postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) <=5)
+    if((postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE) <=5)
     {
-        memcpy(pulseCountParameter,
-            pPostBuffer+SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE,
-            postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        strncpy(pulseCountParameter,
+            (const char*)pCommand+SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE,
+            postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE);
     }
     else {
         printf("Configuration parameter is too long\n");
@@ -159,17 +187,17 @@ void handleResetPcntCommand(void)
 //-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetNumMeasurementCommand(const uint8_t* pPostBuffer,
+void handleSetNumMeasurementCommand(const uint8_t* pCommand,
                                     uint32_t postSizeInBytes)
 {
     // Set the last character to NULL
     char numMeasurementParameter[5]; // Maximum 5 characters for the int16_t
         
-    if((postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) <=5)
+    if((postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE) <=5)
     {
-        memcpy(numMeasurementParameter,
-            pPostBuffer+SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE,
-            postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE);
+        strncpy(numMeasurementParameter,
+            (const char*)pCommand+SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE,
+            postSizeInBytes-SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE);
     }
     else {
         printf("Configuration parameter is too long\n");

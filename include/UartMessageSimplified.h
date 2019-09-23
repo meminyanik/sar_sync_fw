@@ -30,6 +30,8 @@
 //-----------------------------------------------------------------------------
 //  Define simplified protocol version variables
 //-----------------------------------------------------------------------------
-#define SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE 3   // in bytes
+#define SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE		3   // in bytes
+#define SIMPLIFIED_UART_PROTOCOL_OVERHEAD_SIZE		2   // in bytes ($ and #)
+#define SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE	(SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE + SIMPLIFIED_UART_PROTOCOL_OVERHEAD_SIZE)
 
 #endif

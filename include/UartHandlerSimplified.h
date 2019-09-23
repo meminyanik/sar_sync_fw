@@ -48,7 +48,7 @@ void handleRadarTriggerCommand(void);
 //-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetPulseCountCommand(const uint8_t* pPostBuffer,
+void handleSetPulseCountCommand(const uint8_t* pCommand,
                                 uint32_t postSizeInBytes);
 
 //-----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void handleResetPcntCommand(void);
 //-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetNumMeasurementCommand(const uint8_t* pPostBuffer,
+void handleSetNumMeasurementCommand(const uint8_t* pCommand,
                                 	uint32_t postSizeInBytes);
 
 #endif

@@ -27,12 +27,13 @@
 #include "driver/ledc.h"
 #include "driver/gpio.h"
 
-// Output GPIO of a sample 1 Hz pulse generator
+// Output GPIO of a sample 100 KHz pulse generator
 #define LEDC_OUTPUT_IO      18 
 
-/* Configure LED PWM Controller
- * to output sample pulses at 1 Hz with duty of about 10%
- */
+/* 
+	Configure LED PWM Controller
+ 	to output sample pulses at 100 KHz with duty of about 25%
+*/
 void ledcInitialize(void);
 
 #endif

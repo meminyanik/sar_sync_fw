@@ -49,5 +49,6 @@ void ledcInitialize(void)
       .hpoint     = 0,
     };
 
+    // create the pulses immediately
     ledc_channel_config(&ledc_channel);
 }

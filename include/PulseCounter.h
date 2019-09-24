@@ -35,7 +35,6 @@
 #define PCNT_UNIT      		PCNT_UNIT_0
 #define PCNT_H_LIM_VAL      10000
 #define PCNT_L_LIM_VAL     	0
-#define PCNT_THRES_VAL  	99 // Threshold (N-1)
 #define PCNT_INPUT_SIG_IO   4  // Pulse Input GPIO
 #define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down
 
@@ -46,13 +45,17 @@ xQueueHandle pcnt_evt_queue;
 /* user's ISR service handle */
 pcnt_isr_handle_t user_isr_handle;
 
-/* A sample structure to pass events from the PCNT
- * interrupt handler to the main program.
+/* 
+	The data structure to pass events from the PCNT
+	interrupt handler to the radar trigger task.
  */
 typedef struct {
     int unit;  // the PCNT unit that originated an interrupt
     uint32_t status; // information on the event type that caused the interrupt
 } pcnt_evt_t;
+
+/* Pulde counter threshold value */
+int16_t pcntThreshold;
 
 /* Initialize PCNT functions:
  *  - configure and initialize PCNT

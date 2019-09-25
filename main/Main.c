@@ -46,7 +46,6 @@
 	 GPIO18 - LEDC output for internal test
     
 	To use this code, you should connect the pulse output of the Motion Controller to GPIO4.
-	GPIO5 is the radar trigger signal.
   
 	The radar is triggered when the counter value reaches a threshold value.
 */

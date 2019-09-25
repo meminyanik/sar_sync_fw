@@ -31,6 +31,7 @@
 #include "driver/periph_ctrl.h"
 #include "esp_attr.h"
 #include "driver/gpio.h"
+#include "esp_timer.h"
 
 #include <Config.h>
 
@@ -53,7 +54,7 @@
 QueueSetHandle_t radar_trigger_queue_set;
 QueueSetMemberHandle_t radar_trigger_queue_activated;
 
-// A task handle for the radar trigger
+/* A task handle for the radar trigger */
 TaskHandle_t xRadarTriggerTask;
 
 /* Initialize Radar Trigger */

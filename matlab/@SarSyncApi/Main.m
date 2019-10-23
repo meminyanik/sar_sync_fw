@@ -19,7 +19,7 @@
 
 
 %% Create the API object
-SarSyncApi = SarSyncApi("COM2");
+SarSyncApi = SarSyncApi("COM13");
 
 %% Call the Radar Trigger Command
 SarSyncApi.radarTrigger()

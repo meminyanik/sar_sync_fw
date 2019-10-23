@@ -52,7 +52,7 @@ classdef SarSyncApi
         end
         
         %% Set Number of Measurement Command
-        function setNumMeasuremen(obj, numMeasurement)
+        function setNumMeasurement(obj, numMeasurement)
             write(obj.serialPort, "$MSR" + num2str(numMeasurement) + "#", "char")
         end
     end

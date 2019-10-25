@@ -33,7 +33,7 @@ static void pulsewidth_timer_callback(void* arg);
 static esp_timer_handle_t pulsewidth_timer;
 
 /* Pulse width in us (100 us by default) */
-uint64_t radarTriggerPulseWidth_us = 100; 
+uint64_t radarTriggerPulseWidth_us = 10; 
 
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params)

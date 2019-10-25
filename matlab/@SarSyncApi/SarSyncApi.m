@@ -31,8 +31,8 @@ classdef SarSyncApi
             if nargin == 1
                 obj.serialPort = serialport(port,115200);
                 configureTerminator(obj.serialPort,"CR/LF")
-                % configureCallback(obj.serialPort,"terminator",@obj.readSerialData)
                 flush(obj.serialPort)
+                configureCallback(obj.serialPort,"terminator",@readSerialData)
             end
         end
         

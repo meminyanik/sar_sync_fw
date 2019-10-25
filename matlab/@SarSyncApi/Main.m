@@ -14,7 +14,7 @@
 % Main.m
 % 
 % Abstract:
-% The manin script to use the SarSyncApi class to communicate with the hardware
+% The main script to use the SarSyncApi class to communicate with the hardware
 
 
 

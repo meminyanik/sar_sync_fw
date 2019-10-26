@@ -22,6 +22,7 @@ classdef SarSyncApi
     %% Properties
     properties
         serialPort   % Serial port object
+        uartQueueDelay_s = 0.1; % Extra 100 ms delay to process Uart command in the FW
     end
     
     %% Methods
@@ -38,32 +39,50 @@ classdef SarSyncApi
         
         %% Radar Trigger Command
         function radarTrigger(obj)
-            write(obj.serialPort,"$RTG#","char")
+            write(obj.serialPort, "$RTG#", "char")
+            pause(obj.uartQueueDelay_s) 
+        end
+        
+        %% Set Desired Radar Trigger Command
+        function setDesiredRadarTrigger(obj, desiredTrigger)
+            write(obj.serialPort, "$DTG" + num2str(desiredTrigger) + "#", "char")
+            pause(obj.uartQueueDelay_s)
+        end
+        
+        %% Complete Radar Trigger Command
+        function completeRadarTrigger(obj)
+            write(obj.serialPort, "$CTG#", "char")
+            pause(obj.uartQueueDelay_s)
         end
         
         %% Set Pulse Count Command
         function setPulseCount(obj, numPulses)
             write(obj.serialPort, "$PLS" + num2str(numPulses) + "#", "char")
+            pause(obj.uartQueueDelay_s)
         end
         
         %% Reset Pulse Counter Command
         function resetPcnt(obj)
-            write(obj.serialPort,"$RST#","char")
+            write(obj.serialPort, "$RST#", "char")
+            pause(obj.uartQueueDelay_s)
         end
         
         %% Pause Pulse Counter Command
         function pausePcnt(obj)
-            write(obj.serialPort,"$PAU#","char")
+            write(obj.serialPort, "$PAU#", "char")
+            pause(obj.uartQueueDelay_s)
         end
         
         %% Resume Pulse Counter Command
         function resumePcnt(obj)
-            write(obj.serialPort,"$RES#","char")
+            write(obj.serialPort, "$RES#", "char")
+            pause(obj.uartQueueDelay_s)
         end
         
         %% Set Number of Measurement Command
         function setNumMeasurement(obj, numMeasurement)
             write(obj.serialPort, "$MSR" + num2str(numMeasurement) + "#", "char")
+            pause(obj.uartQueueDelay_s)
         end
     end
 end

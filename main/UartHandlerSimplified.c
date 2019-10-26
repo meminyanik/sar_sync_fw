@@ -40,6 +40,8 @@ static char stopSymbol = '#';
 static char radarTriggerCommand[] = "RTG";
 static char setPulseCountCommand[] = "PLS";
 static char resetPcntCommand[] = "RST";
+static char pausePcntCommand[] = "PAU";
+static char resumePcntCommand[] = "RES";
 static char setNumMeasurementCommand[] = "MSR";
 
 //-----------------------------------------------------------------------------
@@ -119,6 +121,18 @@ void uartHandleBufferSimplified(
         printf("Reset command is received\n");
         handleResetPcntCommand();
     }
+    else if ((memcmp(pCommand, pausePcntCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+            && (postSizeInBytes == SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE))
+    {
+        printf("Pause command is received\n");
+        handlePausePcntCommand();
+    }
+    else if ((memcmp(pCommand, resumePcntCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+            && (postSizeInBytes == SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE))
+    {
+        printf("Resume command is received\n");
+        handleResumePcntCommand();
+    }
     else if (memcmp(pCommand, setNumMeasurementCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
         printf("Set number of measurement command is received\n");
@@ -179,8 +193,27 @@ void handleSetPulseCountCommand(const uint8_t* pCommand,
 //-----------------------------------------------------------------------------
 void handleResetPcntCommand(void)
 {
+    /* pause, clear and resume to counting */
     pcnt_counter_pause(PCNT_UNIT);
     pcnt_counter_clear(PCNT_UNIT);
+    pcnt_counter_resume(PCNT_UNIT);
+}
+
+//-----------------------------------------------------------------------------
+// handle the pause command
+//-----------------------------------------------------------------------------
+void handlePausePcntCommand(void)
+{
+    /* pause the counting */
+    pcnt_counter_pause(PCNT_UNIT);
+}
+
+//-----------------------------------------------------------------------------
+// handle the resume command
+//-----------------------------------------------------------------------------
+void handleResumePcntCommand(void)
+{
+    /* resume to counting */
     pcnt_counter_resume(PCNT_UNIT);
 }
 

@@ -51,6 +51,16 @@ classdef SarSyncApi
             write(obj.serialPort,"$RST#","char")
         end
         
+        %% Pause Pulse Counter Command
+        function pausePcnt(obj)
+            write(obj.serialPort,"$PAU#","char")
+        end
+        
+        %% Resume Pulse Counter Command
+        function resumePcnt(obj)
+            write(obj.serialPort,"$RES#","char")
+        end
+        
         %% Set Number of Measurement Command
         function setNumMeasurement(obj, numMeasurement)
             write(obj.serialPort, "$MSR" + num2str(numMeasurement) + "#", "char")

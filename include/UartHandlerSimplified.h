@@ -57,6 +57,16 @@ void handleSetPulseCountCommand(const uint8_t* pCommand,
 void handleResetPcntCommand(void);
 
 //-----------------------------------------------------------------------------
+// handle the pause command
+//-----------------------------------------------------------------------------
+void handlePausePcntCommand(void);
+
+//-----------------------------------------------------------------------------
+// handle the resume command
+//-----------------------------------------------------------------------------
+void handleResumePcntCommand(void);
+
+//-----------------------------------------------------------------------------
 // handle the radar trigger command
 //-----------------------------------------------------------------------------
 void handleSetNumMeasurementCommand(const uint8_t* pCommand,

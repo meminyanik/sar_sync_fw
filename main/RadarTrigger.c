@@ -32,8 +32,8 @@ static void pulsewidth_timer_callback(void* arg);
 /* pulse width timer */
 static esp_timer_handle_t pulsewidth_timer;
 
-/* Pulse width in us (100 us by default) */
-uint64_t radarTriggerPulseWidth_us = 10; 
+/* Pulse width in us (1 us by default) */
+uint64_t radarTriggerPulseWidth_us = 1; 
 
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params)
@@ -175,11 +175,16 @@ void radarTriggerInitialize(void)
 /* Radar Trigger Command */
 void triggerRadar(void)
 {
-    /* Set the level */
+    /* Set the signal level to high */
     gpio_set_level(RADAR_TRIGGER_OUT_PIN, 1);
 
-    /* Start the timer */
-    ESP_ERROR_CHECK(esp_timer_start_once(pulsewidth_timer, radarTriggerPulseWidth_us));
+    /* Set the signal level to low */
+    #ifdef CONFIGURABLE_RADAR_PULSE_WIDTH
+        /* Start the timer */
+        ESP_ERROR_CHECK(esp_timer_start_once(pulsewidth_timer, radarTriggerPulseWidth_us));
+    #else
+        gpio_set_level(RADAR_TRIGGER_OUT_PIN, 0);
+    #endif
 }
 
 /* Pulsewidth timer callback*/

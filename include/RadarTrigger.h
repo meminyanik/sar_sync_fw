@@ -50,6 +50,12 @@
 
 #define RADAR_TRIGGER_QUEUE_SET_LENGTH ( PCNT_EVT_QUEUE_LENGTH + UART_EVT_QUEUE_LENGTH)
 
+//-----------------------------------------------------------------------------
+// If the configurable pulse width is used, comment out this line
+//-----------------------------------------------------------------------------
+// #define CONFIGURABLE_RADAR_PULSE_WIDTH
+
+
 /* A queue set to handle radar trigger events */
 QueueSetHandle_t radar_trigger_queue_set;
 QueueSetMemberHandle_t radar_trigger_queue_activated;

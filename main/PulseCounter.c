@@ -79,7 +79,7 @@ void pcntInitialize(void)
     pcnt_unit_config(&pcnt_config);
 
     /* Configure and enable the input filter */
-    pcnt_set_filter_value(PCNT_UNIT, 100);
+    pcnt_set_filter_value(PCNT_UNIT, 10); // ignore pulses lasting shorter than 10*APB_CLK cycles
     pcnt_filter_enable(PCNT_UNIT);
 
     /* Set threshold value and enable event to watch */
@@ -100,6 +100,5 @@ void pcntInitialize(void)
     pcnt_isr_register(pcntInterruptHandler, NULL, 0, &user_isr_handle);
     pcnt_intr_enable(PCNT_UNIT);
 
-    /* Everything is set up, now go to counting */
-    pcnt_counter_resume(PCNT_UNIT);
+    /* Everything is set up, go to counting using "pcnt_counter_resume(PCNT_UNIT)" function */
 }

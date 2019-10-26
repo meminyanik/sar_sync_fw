@@ -33,7 +33,10 @@ static void pulsewidth_timer_callback(void* arg);
 static esp_timer_handle_t pulsewidth_timer;
 
 /* Pulse width in us (1 us by default) */
-uint64_t radarTriggerPulseWidth_us = 1; 
+uint64_t radarTriggerPulseWidth_us = 1;
+
+/* Number of Radar trigger */
+uint32_t numberOfTrigger = 0;
 
 /* The Radar Trigger Task */
 void radarTriggerTask(void* params)
@@ -104,8 +107,17 @@ void radarTriggerTask(void* params)
             */
             res = xQueueReceive(uart_evt_queue, &uart_evt, 0 / portTICK_PERIOD_MS);
             if (res == pdTRUE) {
-                if (uart_evt == UART_RADAR_TRIGGER_COMMAND) {
+                if (uart_evt.command == UART_RADAR_TRIGGER_COMMAND) {
                     triggerRadar();
+                }
+                if (uart_evt.command == UART_DESIRED_NUM_TRIGGER_COMMAND) {
+                    desiredRadarTrigger = uart_evt.data;
+                }
+                if (uart_evt.command == UART_COMPLETE_NUM_TRIGGER_COMMAND) {
+                    while (desiredRadarTrigger > numberOfTrigger) {
+                        triggerRadar();
+                    }
+                    numberOfTrigger = 0;
                 }
             }
         }
@@ -177,6 +189,9 @@ void triggerRadar(void)
 {
     /* Set the signal level to high */
     gpio_set_level(RADAR_TRIGGER_OUT_PIN, 1);
+
+    /* Update the number of Radar trigger */
+    numberOfTrigger++;
 
     /* Set the signal level to low */
     #ifdef CONFIGURABLE_RADAR_PULSE_WIDTH

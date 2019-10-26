@@ -45,8 +45,16 @@ xQueueHandle uart_evt_queue;
 	The data type to pass events from the Uart task
 	to the radar trigger task.
  */
-typedef uint32_t uart_evt_t;
-#define UART_RADAR_TRIGGER_COMMAND 1
+typedef struct {
+    int command;  	// the command for the Radar trigger task
+    uint32_t data; 	// the data for the Radar trigger task
+} uart_evt_t;
+
+enum eUART_RADAR_TRIGGER_COMMAND_SET {
+	UART_RADAR_TRIGGER_COMMAND = 1,
+	UART_DESIRED_NUM_TRIGGER_COMMAND,
+	UART_COMPLETE_NUM_TRIGGER_COMMAND,
+};
 
 // Initialize the UART Communication
 void uartInitialize(void);

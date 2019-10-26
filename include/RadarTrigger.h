@@ -69,4 +69,7 @@ void radarTriggerInitialize(void);
 /* Radar Trigger Command */
 void triggerRadar(void);
 
+/* Radar Trigger Variables */
+uint32_t desiredRadarTrigger;
+
 #endif

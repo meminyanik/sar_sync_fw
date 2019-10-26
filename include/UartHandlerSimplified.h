@@ -46,7 +46,18 @@ void uartHandleBufferSimplified(
 void handleRadarTriggerCommand(void);
 
 //-----------------------------------------------------------------------------
-// handle the radar trigger command
+// handle the set desired radar trigger command
+//-----------------------------------------------------------------------------
+void handleSetDesiredRadarTriggerCommand(const uint8_t* pCommand,
+                                		uint32_t postSizeInBytes);
+
+//-----------------------------------------------------------------------------
+// handle the complete radar trigger command
+//-----------------------------------------------------------------------------
+void handleCompleteRadarTriggerCommand(void);
+
+//-----------------------------------------------------------------------------
+// handle the set pulse count command
 //-----------------------------------------------------------------------------
 void handleSetPulseCountCommand(const uint8_t* pCommand,
                                 uint32_t postSizeInBytes);
@@ -67,7 +78,7 @@ void handlePausePcntCommand(void);
 void handleResumePcntCommand(void);
 
 //-----------------------------------------------------------------------------
-// handle the radar trigger command
+// handle the set number of measurements command
 //-----------------------------------------------------------------------------
 void handleSetNumMeasurementCommand(const uint8_t* pCommand,
                                 	uint32_t postSizeInBytes);

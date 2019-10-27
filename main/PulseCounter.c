@@ -39,9 +39,16 @@ static void IRAM_ATTR pcntInterruptHandler(void *arg)
         if (intr_status & (BIT(i))) {
             evt.unit = i;
             /* Save the PCNT event type that caused an interrupt
-               to pass it to the main program */
+               to pass it to the Radar trigger task */
             evt.status = PCNT.status_unit[i].val;
             PCNT.int_clr.val = BIT(i);
+
+            /* Clear the counter if Threshold is reached */
+            if (evt.status & PCNT_STATUS_THRES0_M) {
+                pcnt_counter_clear(PCNT_UNIT);
+            }
+
+            /* Send event to the queue */
             xQueueSendFromISR(pcnt_evt_queue, &evt, &xHigherPriorityTaskWoken);
             if (xHigherPriorityTaskWoken == pdTRUE) {
                 portYIELD_FROM_ISR();

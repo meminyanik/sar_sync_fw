@@ -85,7 +85,6 @@ void radarTriggerTask(void* params)
             res = xQueueReceive(pcnt_evt_queue, &pcnt_evt, 0 / portTICK_PERIOD_MS);
             if (res == pdTRUE) {
                 if (pcnt_evt.status & PCNT_STATUS_THRES0_M) {
-                    pcnt_counter_clear(PCNT_UNIT);
                     triggerRadar();
                 }
                 if (pcnt_evt.status & PCNT_STATUS_L_LIM_M) {

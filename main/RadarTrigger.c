@@ -112,10 +112,7 @@ void radarTriggerTask(void* params)
                 if (uart_evt.command == UART_DESIRED_NUM_TRIGGER_COMMAND) {
                     desiredRadarTrigger = uart_evt.data;
                 }
-                if (uart_evt.command == UART_COMPLETE_NUM_TRIGGER_COMMAND) {
-                    while (desiredRadarTrigger > numberOfTrigger) {
-                        triggerRadar();
-                    }
+                if (uart_evt.command == UART_CLEAR_NUM_TRIGGER_COMMAND) {
                     numberOfTrigger = 0;
                 }
             }

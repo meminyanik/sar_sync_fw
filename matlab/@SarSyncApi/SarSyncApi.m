@@ -43,14 +43,14 @@ classdef SarSyncApi
             pause(obj.uartQueueDelay_s) 
         end
         
-        %% Set Desired Radar Trigger Command
+        %% Set Desired Number of Radar Trigger Command
         function setDesiredRadarTrigger(obj, desiredTrigger)
             write(obj.serialPort, "$DTG" + num2str(desiredTrigger) + "#", "char")
             pause(obj.uartQueueDelay_s)
         end
         
-        %% Complete Radar Trigger Command
-        function completeRadarTrigger(obj)
+        %% Clear Number of Radar Trigger Command
+        function clearNumTrigger(obj)
             write(obj.serialPort, "$CTG#", "char")
             pause(obj.uartQueueDelay_s)
         end

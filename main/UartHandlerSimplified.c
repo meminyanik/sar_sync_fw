@@ -38,8 +38,8 @@ static char startSymbol = '$';
 static char stopSymbol = '#';
 
 static char radarTriggerCommand[] = "RTG";
-static char setDesiredRadarTriggerCommand[] = "DTG";
-static char completeRadarTriggerCommand[] = "CTG";
+static char setDesiredNumberOfTriggerCommand[] = "DTG";
+static char clearNumberOfTriggerCommand[] = "CTG";
 
 static char setPulseCountCommand[] = "PLS";
 static char resetPcntCommand[] = "RST";
@@ -114,16 +114,16 @@ void uartHandleBufferSimplified(
         printf("Radar trigger command is received\n");
         handleRadarTriggerCommand();
     }
-    else if (memcmp(pCommand, setDesiredRadarTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    else if (memcmp(pCommand, setDesiredNumberOfTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
     {
-        printf("Set desired Radar trigger command is received\n");
-        handleSetDesiredRadarTriggerCommand(pCommand, postSizeInBytes);
+        printf("Set desired number of Radar trigger command is received\n");
+        handleSetDesiredNumberOfTriggerCommand(pCommand, postSizeInBytes);
     }
-    else if ((memcmp(pCommand, completeRadarTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
+    else if ((memcmp(pCommand, clearNumberOfTriggerCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
         && (postSizeInBytes == SIMPLIFIED_UART_PROTOCOL_MIN_PACKET_SIZE))
     {
-        printf("Complete Radar trigger command is received\n");
-        handleCompleteRadarTriggerCommand();
+        printf("Clear number of Radar trigger command is received\n");
+        handleClearNumberOfTriggerCommand();
     }
 
     else if (memcmp(pCommand, setPulseCountCommand, SIMPLIFIED_UART_PROTOCOL_COMMAND_SIZE) == 0)
@@ -173,9 +173,9 @@ void handleRadarTriggerCommand(void)
 }
 
 //-----------------------------------------------------------------------------
-// handle the set desired radar trigger command
+// handle the set desired number of radar trigger command
 //-----------------------------------------------------------------------------
-void handleSetDesiredRadarTriggerCommand(const uint8_t* pCommand,
+void handleSetDesiredNumberOfTriggerCommand(const uint8_t* pCommand,
                                         uint32_t postSizeInBytes)
 {
     // Set the last character to NULL
@@ -212,12 +212,12 @@ void handleSetDesiredRadarTriggerCommand(const uint8_t* pCommand,
 }
 
 //-----------------------------------------------------------------------------
-// handle the complete radar trigger command
+// handle the clear number of radar trigger command
 //-----------------------------------------------------------------------------
-void handleCompleteRadarTriggerCommand(void)
+void handleClearNumberOfTriggerCommand(void)
 {
     uart_evt_t evt;
-    evt.command = UART_COMPLETE_NUM_TRIGGER_COMMAND;
+    evt.command = UART_CLEAR_NUM_TRIGGER_COMMAND;
     xQueueSend(uart_evt_queue, &evt, 0 / portTICK_PERIOD_MS);
 }
 

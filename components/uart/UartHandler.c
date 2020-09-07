@@ -24,7 +24,6 @@ Abstract:
 
 #include <UartHandler.h>
 #include <string.h>
-#include <RadarTrigger.h>
 
 
 //-----------------------------------------------------------------------------

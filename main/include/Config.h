@@ -38,12 +38,6 @@
 #define DEFAULT_TASK_STACK_SIZE_BYTES       DEFAULT_TASK_STACK_SIZE_WORDS * sizeof(uint32_t)
 
 //-----------------------------------------------------------------------------
-// If the advanced protocol is used, comment this line
-// Otherwise, the simplified command protocol will be used
-//-----------------------------------------------------------------------------
-#define SIMPLIFIED_PROTOCOL_VERSION
-
-//-----------------------------------------------------------------------------
 // If the test mode is active, comment out this line
 // Then the pulse counter will work based on the internally created pulses
 //-----------------------------------------------------------------------------

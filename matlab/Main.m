@@ -19,13 +19,10 @@
 
 
 %% Create the API object
-SarSyncApi = SarSyncApi("COM13");
+SarSyncApi = SarSyncApi("COM5");
 
 %% Call the Radar Trigger Command
 SarSyncApi.radarTrigger()
 
 %% Call the Set Pulse Count Command
 SarSyncApi.setPulseCount(1200)
-
-%% Read the input data
-readline(SarSyncApi.serialPort)

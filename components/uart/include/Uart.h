@@ -35,6 +35,14 @@
 // Uart RX and TX buffer size
 #define UART_BUFFER_SIZE 	1024
 
+// Define following to set the UART debug port (Use UART_NUM_2)
+#define UART_DEBUG_MODE
+
+#ifdef UART_DEBUG_MODE
+	#define UART_DATA_RXD_PIN (GPIO_NUM_16)
+	#define UART_DATA_TXD_PIN (GPIO_NUM_17)
+#endif
+
 // Initialize the UART Communication
 void uartInitialize(void);
 

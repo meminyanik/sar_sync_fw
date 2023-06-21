@@ -26,10 +26,11 @@
 
 #include "Config.h"
 #include "driver/pulse_cnt.h"
+#include <limits.h>
 
 
-#define PCNT_H_LIM_VAL      	10000
-#define PCNT_L_LIM_VAL     		0
+#define PCNT_H_LIM_VAL      	SHRT_MAX
+#define PCNT_L_LIM_VAL     		SHRT_MIN
 #define PCNT_INPUT_EDGE_IO 		0  // Pulse Input GPIO (Edge)
 
 

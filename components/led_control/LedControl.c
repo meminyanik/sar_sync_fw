@@ -31,24 +31,24 @@ void ledcInitialize(void)
 {
     // Prepare and then apply the LEDC PWM timer configuration
     ledc_timer_config_t ledc_timer = {
-      .speed_mode       = LEDC_HIGH_SPEED_MODE,
-      .timer_num        = LEDC_TIMER_1,
-      .duty_resolution  = LEDC_TIMER_8_BIT,
-      .freq_hz          = 100000,  // set output frequency at 100 KHz
+      .speed_mode       = LEDC_MODE,
+      .timer_num        = LEDC_TIMER,
+      .duty_resolution  = LEDC_DUTY_RES,
+      .freq_hz          = LEDC_FREQUENCY, 
+      .clk_cfg          = LEDC_AUTO_CLK,
     };
-    ledc_timer_config(&ledc_timer);
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
 
     // Prepare and then apply the LEDC PWM channel configuration
     ledc_channel_config_t ledc_channel = {
-      .speed_mode = LEDC_HIGH_SPEED_MODE,
-      .channel    = LEDC_CHANNEL_1,
-      .timer_sel  = LEDC_TIMER_1,
+      .speed_mode = LEDC_MODE,
+      .channel    = LEDC_CHANNEL,
+      .timer_sel  = LEDC_TIMER,
       .intr_type  = LEDC_INTR_DISABLE,
       .gpio_num   = LEDC_OUTPUT_IO,
-      .duty       = 64, // the range of duty setting is [0, (2**duty_resolution - 1)]
+      .duty       = LEDC_DUTY,
       .hpoint     = 0,
     };
-
     // create the pulses immediately
-    ledc_channel_config(&ledc_channel);
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 }

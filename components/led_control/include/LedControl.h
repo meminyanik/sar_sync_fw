@@ -29,6 +29,13 @@
 #include "driver/gpio.h"
 
 // Output GPIO of a sample 100 KHz pulse generator
+#define LEDC_TIMER          LEDC_TIMER_0
+#define LEDC_CHANNEL        LEDC_CHANNEL_0
+#define LEDC_MODE           LEDC_HIGH_SPEED_MODE
+#define LEDC_DUTY_RES       LEDC_TIMER_8_BIT 	// Set duty resolution to 8 bits
+#define LEDC_FREQUENCY      100000 				// Frequency in Hertz. Set frequency at 100 KHz (10us interval)
+#define LEDC_DUTY           26 					// Set duty to 10% (1us pulses). ((2 ** 8) - 1) * 10% ~= 26		<-	(2**duty_resolution - 1) * duty_cycle
+
 #define LEDC_OUTPUT_IO      2 
 
 /* 

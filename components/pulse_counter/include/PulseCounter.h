@@ -24,38 +24,14 @@
 #ifndef PULSE_COUNTER_H
 #define PULSE_COUNTER_H
 
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
-#include "driver/periph_ctrl.h"
-#include "driver/pcnt.h"
-#include "esp_attr.h"
+#include "Config.h"
+#include "driver/pulse_cnt.h"
 
 
-#define PCNT_UNIT      		PCNT_UNIT_0
-#define PCNT_H_LIM_VAL      10000
-#define PCNT_L_LIM_VAL     	0
-#define PCNT_INPUT_SIG_IO   4  // Pulse Input GPIO
-#define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down
+#define PCNT_H_LIM_VAL      	10000
+#define PCNT_L_LIM_VAL     		0
+#define PCNT_INPUT_EDGE_IO 		0  // Pulse Input GPIO (Edge)
 
-
-/* A queue to handle pulse counter events */
-xQueueHandle pcnt_evt_queue;
-
-/* user's ISR service handle */
-pcnt_isr_handle_t user_isr_handle;
-
-/* 
-	The data structure to pass events from the PCNT
-	interrupt handler to the radar trigger task.
- */
-typedef struct {
-    int unit;  // the PCNT unit that originated an interrupt
-    uint32_t status; // information on the event type that caused the interrupt
-} pcnt_evt_t;
-
-/* Pulde counter threshold value */
-int16_t pcntThreshold;
 
 /* Initialize PCNT functions:
  *  - configure and initialize PCNT

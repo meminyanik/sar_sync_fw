@@ -50,7 +50,7 @@ void uartTask(void *arg)
 
     // Read the packet and process it
     while (1) {
-        const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 10 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_HOST_PC, sUartRxBuffer, UART_BUFFER_SIZE, 10 / portTICK_PERIOD_MS);
         if (rxBytes > 0) {
             // Handle the buffer content
             #ifdef SIMPLIFIED_PROTOCOL_VERSION
@@ -77,6 +77,10 @@ void uartTask(void *arg)
 }
 
 void uartInitialize(void) {
+    /* Set the log level */
+    static const char *TAG = "UART_INIT";
+    esp_log_level_set(TAG, ESP_LOG_INFO);
+
     // Set UART configuration parameters
     const uart_config_t uart_config = {
         .baud_rate = 115200,
@@ -120,6 +124,6 @@ void uartInitialize(void) {
     if( xReturned != pdPASS )
     {
         /* The task is not created. */
-        printf("The UART Task could not created.");
+        ESP_LOGI(TAG, "The UART Task could not created.");
     }
 }

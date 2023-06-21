@@ -24,20 +24,15 @@
 #ifndef RADAR_TRIGGER_H
 #define RADAR_TRIGGER_H
 
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/periph_ctrl.h"
-#include "esp_attr.h"
+#include "Config.h"
 #include "driver/gpio.h"
 #include "esp_timer.h"
 
-#include <Config.h>
 
 // Output GPIO of the Radar Trigger
-#define RADAR_TRIGGER_OUT_PIN      19
-#define GPIO_OUTPUT_PIN_SEL  (1ULL<<RADAR_TRIGGER_OUT_PIN)
+#define RADAR_TRIGGER_OUTPUT_IO      4
+#define RADAR_TRIGGER_OUTPUT_PIN_SEL  (1ULL<<RADAR_TRIGGER_OUTPUT_IO)
+
 
 /* 
 	Radar Trigger task has two queues
@@ -56,20 +51,10 @@
 // #define CONFIGURABLE_RADAR_PULSE_WIDTH
 
 
-/* A queue set to handle radar trigger events */
-QueueSetHandle_t radar_trigger_queue_set;
-QueueSetMemberHandle_t radar_trigger_queue_activated;
-
-/* A task handle for the radar trigger */
-TaskHandle_t xRadarTriggerTask;
-
 /* Initialize Radar Trigger */
 void radarTriggerInitialize(void);
 
 /* Radar Trigger Command */
 void triggerRadar(void);
-
-/* Radar Trigger Variables */
-uint32_t desiredRadarTrigger;
 
 #endif

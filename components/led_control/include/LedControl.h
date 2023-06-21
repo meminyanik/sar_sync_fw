@@ -24,11 +24,12 @@
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
 
+#include "Config.h"
 #include "driver/ledc.h"
 #include "driver/gpio.h"
 
 // Output GPIO of a sample 100 KHz pulse generator
-#define LEDC_OUTPUT_IO      18 
+#define LEDC_OUTPUT_IO      2 
 
 /* 
 	Configure LED PWM Controller

@@ -21,16 +21,14 @@
 	The entry point of the application
 */
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-#include <Config.h>
-#include <Uart.h>
-#include <RadarTrigger.h>
-#include <PulseCounter.h>
+#include "Config.h"
+#include "Uart.h"
+#include "RadarTrigger.h"
+#include "PulseCounter.h"
+#include "nvs_flash.h"
 
 #ifdef INTERNAL_TEST_MODE
-    #include <LedControl.h>
+    #include "LedControl.h"
 #endif
 
 
@@ -40,10 +38,10 @@
 	and triggers Radar after a predefined number of pulses
 
 	Functionality of GPIOs used in this example:
-     GPIO4 -  pulse input pin,
-     GPIO19 - radar trigger output pin.
+     GPIO0 - pulse input pin,
+     GPIO4 - radar trigger output pin.
 
-	 GPIO18 - LEDC output for internal test
+	 GPIO2 - LEDC output for internal test
     
 	To use this code, you should connect the pulse output of the Motion Controller to GPIO4.
   
@@ -53,6 +51,14 @@
 
 void app_main(void)
 {
+	/* Initialize NVS */
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+	
 	//-----------------------------------------------------
 	// Initialize LEDC to generate sample pulse signal
 	//-----------------------------------------------------

@@ -24,6 +24,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "sdkconfig.h"
 #include <stdio.h>
 
 //-----------------------------------------------------------------------------
@@ -43,5 +48,17 @@
 // Then the pulse counter will work based on the internally created pulses
 //-----------------------------------------------------------------------------
 // #define INTERNAL_TEST_MODE
+
+/* The data type to pass events from the Uart task to the radar trigger task */
+typedef struct {
+    int command;  	// the command for the Radar trigger task
+    uint32_t data; 	// the data for the Radar trigger task
+} uart_evt_t;
+
+enum eUART_RADAR_TRIGGER_COMMAND_SET {
+	UART_RADAR_TRIGGER_COMMAND = 1,
+	UART_DESIRED_NUM_TRIGGER_COMMAND,
+	UART_CLEAR_NUM_TRIGGER_COMMAND,
+};
 
 #endif

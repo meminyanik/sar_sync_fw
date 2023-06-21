@@ -24,38 +24,35 @@
 #include <PulseCounter.h>
 
 
-/* Decode what PCNT's unit originated an interrupt
- * and pass this information together with the event type
- * the main program using a queue.
+/* PCNT unit */
+pcnt_unit_handle_t pcnt_unit;
+
+/* A queue to handle pulse counter events */
+QueueHandle_t pcnt_evt_queue;
+
+/* PCNT threshold value */
+int pcntThreshold;
+
+/* PCNT's event callback
+ * pass the event data to the main program using a queue.
  */
-static void IRAM_ATTR pcntInterruptHandler(void *arg)
+static bool pcnt_handler_on_reach(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *user_ctx)
 {
-    uint32_t intr_status = PCNT.int_st.val;
-    int i;
-    pcnt_evt_t evt;
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-
-    for (i = 0; i < PCNT_UNIT_MAX; i++) {
-        if (intr_status & (BIT(i))) {
-            evt.unit = i;
-            /* Save the PCNT event type that caused an interrupt
-               to pass it to the Radar trigger task */
-            evt.status = PCNT.status_unit[i].val;
-            PCNT.int_clr.val = BIT(i);
-
-            /* Clear the counter if Threshold is reached */
-            if (evt.status & PCNT_STATUS_THRES0_M) {
-                pcnt_counter_clear(PCNT_UNIT);
-            }
-
-            /* Send event to the queue */
-            xQueueSendFromISR(pcnt_evt_queue, &evt, &xHigherPriorityTaskWoken);
-            if (xHigherPriorityTaskWoken == pdTRUE) {
-                portYIELD_FROM_ISR();
-            }
-        }
+    BaseType_t high_task_wakeup;
+    QueueHandle_t queue = (QueueHandle_t)user_ctx;
+    
+    /* clear the counter if threshold is reached */
+    if (edata->watch_point_value == pcntThreshold) {
+        ESP_ERROR_CHECK(pcnt_unit_clear_count(pcnt_unit));
     }
+
+    /* send watch point to queue, from this interrupt callback */
+    xQueueSendFromISR(queue, &(edata->watch_point_value), &high_task_wakeup);
+    
+    /* return whether a high priority task has been waken up by this function */
+    return (high_task_wakeup == pdTRUE);
 }
+
 
 /* Initialize PCNT functions:
  *  - configure and initialize PCNT
@@ -64,48 +61,46 @@ static void IRAM_ATTR pcntInterruptHandler(void *arg)
  */
 void pcntInitialize(void)
 {
-    /* Prepare configuration for the PCNT unit */
-    pcnt_config_t pcnt_config = {
-        // Set PCNT input signal and control GPIOs
-        .pulse_gpio_num = PCNT_INPUT_SIG_IO,
-        .ctrl_gpio_num = PCNT_INPUT_CTRL_IO,
-        .channel = PCNT_CHANNEL_0,
-        .unit = PCNT_UNIT,
-        // What to do on the positive / negative edge of pulse input?
-        .pos_mode = PCNT_COUNT_DIS,   // Count up on the positive edge
-        .neg_mode = PCNT_COUNT_INC,   // Keep the counter value on the negative edge
-        // What to do when control input is low or high?
-        .lctrl_mode = PCNT_MODE_REVERSE, // Reverse counting direction if low
-        .hctrl_mode = PCNT_MODE_KEEP,    // Keep the primary counter mode if high
-        // Set the maximum and minimum limit values to watch
-        .counter_h_lim = PCNT_H_LIM_VAL,
-        .counter_l_lim = PCNT_L_LIM_VAL,
-    };
-
-    /* Initialize PCNT unit */
-    pcnt_unit_config(&pcnt_config);
-
-    /* Configure and enable the input filter */
-    pcnt_set_filter_value(PCNT_UNIT, 10); // ignore pulses lasting shorter than 10*APB_CLK cycles
-    pcnt_filter_enable(PCNT_UNIT);
-
-    /* Set threshold value and enable event to watch */
-    pcntThreshold = 10;
-    pcnt_set_event_value(PCNT_UNIT, PCNT_EVT_THRES_0, pcntThreshold);
-    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_THRES_0);
+    /* Set the log level */
+    static const char *TAG = "PCNT_INIT";
+    esp_log_level_set(TAG, ESP_LOG_INFO);   
     
-    /* Enable events on zero, maximum and minimum limit values */
-    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_ZERO);
-    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_H_LIM);
-    pcnt_event_enable(PCNT_UNIT, PCNT_EVT_L_LIM);
+    /* install pcnt unit */
+    pcnt_unit_config_t unit_config = {
+        .high_limit = PCNT_H_LIM_VAL,
+        .low_limit = PCNT_L_LIM_VAL,
+    };
+    ESP_ERROR_CHECK(pcnt_new_unit(&unit_config, &pcnt_unit)); 
+    
+    /* set glitch filter, ignore pulses lasting shorter than this */
+    pcnt_glitch_filter_config_t filter_config = {
+        .max_glitch_ns = 125,
+    };
+    ESP_ERROR_CHECK(pcnt_unit_set_glitch_filter(pcnt_unit, &filter_config));
 
-    /* Initialize PCNT's counter */
-    pcnt_counter_pause(PCNT_UNIT);
-    pcnt_counter_clear(PCNT_UNIT);
+    /* install pcnt channel */
+    pcnt_chan_config_t chan_config = {
+        .edge_gpio_num = PCNT_INPUT_EDGE_IO,
+        .level_gpio_num = -1,
+    };
+    pcnt_channel_handle_t pcnt_chan = NULL;
+    ESP_ERROR_CHECK(pcnt_new_channel(pcnt_unit, &chan_config, &pcnt_chan)); 
+   
+    /* set edge action for pcnt channels: keep the counter on rising edge, increase the counter on falling edge */
+    ESP_ERROR_CHECK(pcnt_channel_set_edge_action(pcnt_chan, PCNT_CHANNEL_EDGE_ACTION_HOLD, PCNT_CHANNEL_EDGE_ACTION_INCREASE));
+    
+    /* add watch point */
+    pcntThreshold = 10;
+    ESP_ERROR_CHECK(pcnt_unit_add_watch_point(pcnt_unit, pcntThreshold));
 
-    /* Register ISR handler and enable interrupts for PCNT unit */
-    pcnt_isr_register(pcntInterruptHandler, NULL, 0, &user_isr_handle);
-    pcnt_intr_enable(PCNT_UNIT);
-
-    /* Everything is set up, go to counting using "pcnt_counter_resume(PCNT_UNIT)" function */
+    /* register callbacks */
+    pcnt_event_callbacks_t cbs = {
+        .on_reach = pcnt_handler_on_reach,
+    };
+    ESP_ERROR_CHECK(pcnt_unit_register_event_callbacks(pcnt_unit, &cbs, pcnt_evt_queue));
+    
+     /* Enable, clear, and start pcnt unit */
+    ESP_ERROR_CHECK(pcnt_unit_enable(pcnt_unit));
+    ESP_ERROR_CHECK(pcnt_unit_clear_count(pcnt_unit));
+    ESP_ERROR_CHECK(pcnt_unit_start(pcnt_unit));
 }

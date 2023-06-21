@@ -23,6 +23,7 @@ Abstract:
 */
 
 #include <UartHandler.h>
+#include "esp_log.h"
 #include <string.h>
 
 
@@ -37,12 +38,16 @@ void uartHandleBuffer(
     uint32_t replySizeInBytes,
     uint32_t* pNumReplyBytesWritten)
 {
+    /* Set the log level */
+    static const char *TAG = "UART_HANDLE_BUFFER";
+    esp_log_level_set(TAG, ESP_LOG_INFO);
+
     //-----------------------------------------------------------------------------
     // post packet should at least be the overhead size (i.e. header + footer)
     //-----------------------------------------------------------------------------
     if (postSizeInBytes < UART_PROTOCOL_OVERHEAD_SIZE_BYTES)
     {
-        printf("Received packet is too small (received:%d < expected:%d).\n", postSizeInBytes, UART_PROTOCOL_OVERHEAD_SIZE_BYTES);
+        ESP_LOGI(TAG, "Received packet is too small (received:%lu < expected:%d)", postSizeInBytes, UART_PROTOCOL_OVERHEAD_SIZE_BYTES);
         setProtocolErrorResponseFrame(pReplyBuffer, UART_INVALID_FRAME_LENGTH, pNumReplyBytesWritten);
         return;
     }
@@ -60,7 +65,7 @@ void uartHandleBuffer(
     //-----------------------------------------------------------------------------
     if (uartHeader.preamble != UART_PROTOCOL_PREAMBLE)
     {
-        printf("Preamble is not correct (received:0x%.4X != expected:0x%.4X).\n", uartHeader.preamble, UART_PROTOCOL_PREAMBLE);
+        ESP_LOGI(TAG, "Preamble is not correct (received:0x%.4X != expected:0x%.4X)", uartHeader.preamble, UART_PROTOCOL_PREAMBLE);
         setProtocolErrorResponseFrame(pReplyBuffer, UART_INVALID_PREAMBLE, pNumReplyBytesWritten);
         return;
     }
@@ -71,7 +76,7 @@ void uartHandleBuffer(
     uint32_t expectedFrameLength = uartHeader.payloadLen + UART_PROTOCOL_OVERHEAD_SIZE_BYTES;
     if (postSizeInBytes != expectedFrameLength)
     {
-        printf("Frame length is not correct (received:%d != expected:%d).\n", postSizeInBytes, expectedFrameLength);
+        ESP_LOGI(TAG, "Frame length is not correct (received:%lu != expected:%lu)", postSizeInBytes, expectedFrameLength);
         setProtocolErrorResponseFrame(pReplyBuffer, UART_INVALID_FRAME_LENGTH, pNumReplyBytesWritten);
         return;
     }
@@ -88,7 +93,7 @@ void uartHandleBuffer(
 
     if ((pChecksum[0] != calculatedChecksum[0]) || (pChecksum[1] != calculatedChecksum[1]))
     {
-        printf("Checksum is not correct (received:0x%.2X%.2X != expected:0x%.2X%.2X).\n", pChecksum[0], pChecksum[1], calculatedChecksum[0], calculatedChecksum[1]);
+        ESP_LOGI(TAG, "Checksum is not correct (received:0x%.2X%.2X != expected:0x%.2X%.2X)", pChecksum[0], pChecksum[1], calculatedChecksum[0], calculatedChecksum[1]);
         setProtocolErrorResponseFrame(pReplyBuffer, UART_ERROR_IN_CHECKSUM, pNumReplyBytesWritten);
         return;
     }
@@ -98,7 +103,7 @@ void uartHandleBuffer(
     //-----------------------------------------------------------------------------
     if (uartHeader.protocolVersion != UART_PROTOCOL_VERSION)
     {
-        printf("Protocol versions do not match (received:0x%.2X != expected:0x%.2X).\n", uartHeader.protocolVersion, UART_PROTOCOL_VERSION);
+        ESP_LOGI(TAG, "Protocol versions do not match (received:0x%.2X != expected:0x%.2X)", uartHeader.protocolVersion, UART_PROTOCOL_VERSION);
         setProtocolErrorResponseFrame(pReplyBuffer, UART_PROTOCOL_VERSION_MISMATCH, pNumReplyBytesWritten);
         return;
     }
@@ -108,7 +113,7 @@ void uartHandleBuffer(
     //-----------------------------------------------------------------------------
     if (uartHeader.commandStatus != UART_SUCCESS)
     {
-        printf("Command Status is not correct (received:0x%.2X != expected:0x%.2X).\n", uartHeader.commandStatus, UART_SUCCESS);
+        ESP_LOGI(TAG, "Command Status is not correct (received:0x%.2X != expected:0x%.2X)", uartHeader.commandStatus, UART_SUCCESS);
         setProtocolErrorResponseFrame(pReplyBuffer, UART_INVALID_CMD_STATUS, pNumReplyBytesWritten);
         return;
     }
@@ -141,22 +146,22 @@ void uartHandleBuffer(
     {
         case TRIGGER_RADAR:
         {
-            printf("Trigger radar command with ID: %d is received.\n", TRIGGER_RADAR);
+            ESP_LOGI(TAG, "Trigger radar command with ID: %d is received", TRIGGER_RADAR);
             break;
         }
         case SET_PULSE_COUNT:
         {
-            printf("Set pulse count command with ID: %d is received.\n", SET_PULSE_COUNT);
+            ESP_LOGI(TAG, "Set pulse count command with ID: %d is received", SET_PULSE_COUNT);
             break;
         }
         case STOP_SYSTEM:
         {
-            printf("Stop system command with ID: %d is received.\n", STOP_SYSTEM);
+            ESP_LOGI(TAG, "Stop system command with ID: %d is received", STOP_SYSTEM);
             break;
         }
         default:
         {
-            printf("Unknown Uart command with ID: %d is received.\n", uartHeader.commandId);
+            ESP_LOGI(TAG, "Unknown Uart command with ID: %u is received", uartHeader.commandId);
             setProtocolErrorResponseFrame(pReplyBuffer, UART_UNKNOWN_CMD_ID, pNumReplyBytesWritten);
             return;
         }

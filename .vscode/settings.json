@@ -1,9 +1,14 @@
 {
     "files.associations": {
         "cstdint": "c",
-        "uarthandler.h": "c"
+        "uarthandler.h": "c",
+        "config.h": "c",
+        "uart.h": "c",
+        "radartrigger.h": "c",
+        "pulsecounter.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "idf.adapterTargetName": "esp32",
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "idf.portWin": "COM7"
 }

@@ -27,4 +27,5 @@ This module also supports a test mode, where an internal pulse generator is bein
 This code is developed using ESP-IDF (Espressif IoT Development Framework) v5.0.
 
 Please follow the link below to build and flash firmware onto an ESP32 board.
+
 Link: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/
